@@ -1,0 +1,8 @@
+{
+    "success": true,
+    "user": {
+        "user_unique_id": "uuname1",
+        "user_password": "$2b$10$9wx3Ai01rrVYIEx9K3mLyeqwxf1AVQr6iVQ/3IfdKz0WWjPXFOzgi"
+    },
+    "sessionId": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InV1bmFtZTEiLCJpYXQiOjE3MjUxODYxNjUsImV4cCI6MTcyNTE4Nzk2NX0.ZXi7DFeWx11p94G1ivM-xqCfTgCE1p_49rJbYiJZfbM"
+}
