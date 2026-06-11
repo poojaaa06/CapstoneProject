@@ -42,8 +42,15 @@ const AppHeader = (props: any) => {
   const { setOpenMobileMenu, openMobileMenu } = props;
   const { userDetails, isMobile, setOpenProfile } = useAppContext();
 
+   const navigate = useNavigate();
+
+  const logoutHandler = () => {
+    sessionStorage.removeItem("userDetails");
+    navigate("/", { replace: true });
+    }
+
   const ProfilePopoverContent = () => {
-    const navigate = useNavigate();
+  
     return (
       <div style={{ padding: "8px" }}>
         <p>
@@ -60,7 +67,7 @@ const AppHeader = (props: any) => {
             paddingTop: "8px",
           }}
         >
-          <Button type="primary" onClick={() => navigate("/")}>
+          <Button type="primary" onClick={logoutHandler}>
             Logout
           </Button>
         </div>
