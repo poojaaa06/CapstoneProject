@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from 'src/context/appContext';
 import {
+  App,
   Row,
   Col,
   Space,
@@ -17,7 +18,6 @@ import {
   DatePicker,
   Dropdown,
   MenuProps,
-  Modal,
   Form as AntForm,
 } from 'antd';
 import {
@@ -46,6 +46,7 @@ export const Profile: React.FC = () => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [api, contextHolder] = notification.useNotification();
   const navigate = useNavigate();
+  const { modal }= App.useApp();
   // Seed profileImage once when userDetails first arrives
   useEffect(() => {
     if (!profileImage && userDetails) {
@@ -86,20 +87,16 @@ export const Profile: React.FC = () => {
   };
 
   const handleDeleteAccount = () => {
-    console.log("Delete Clicked");
-    Modal.confirm({
+    modal.confirm({
       title: 'Delete Account',
       content:
         'Are you sure you want to delete your account? This action cannot be undone.',
       okText: 'Delete',
       okType: 'danger',
       cancelText: 'Cancel',
-
       onOk: () => {
-        // Clear session storage
-        sessionStorage.clear();
+        sessionStorage.removeItem('userDetails');
 
-        // Clear user context
         if (setUserDetails) {
           setUserDetails(null);
         }
@@ -108,10 +105,12 @@ export const Profile: React.FC = () => {
           message: 'Account Deleted',
           description: 'Your account has been deleted successfully.',
           placement: 'topRight',
+          duration: 3,
         });
 
-        // Redirect to login page
-        navigate('/');
+        setTimeout(() => {
+          navigate('/');
+        }, 1000);
       },
     });
   };
