@@ -110,7 +110,7 @@ export const Profile: React.FC = () => {
 
         setTimeout(() => {
           navigate('/');
-        }, 1000);
+        }, 1500);
       },
     });
   };
