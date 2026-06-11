@@ -1,0 +1,35 @@
+START  == npm start.
+
+1. App is built with React js because it has more resources and support then next js though it is
+   not compactable for SCO.
+2. Styled Components are used as it is also SEO with NEXT JS.
+3. 
+
+Library and theme == used Antd and antd theme
+1. Antd is used because it has simple and easy to use components.
+
+
+
+--------Font sizes--------------------------------------------------------
+18, 16, 14, 12
+18-- Page headers etx.
+16-- Card headings.
+14-- Normal fonts, Labels etc.
+12-- Not important texts in UI, like remember me in Login.
+
+**Font-sizes should be in rem, No other fonts should be used unless it is a special case
+---------------------------------------------------------------------------
+
+
+-----------How to write styles------------------------------------------
+1. We are using styled-components, and all the styles should be written in styles sheet
+   Inline styles and internal styles are strictly prohibited.
+2. Common components are added in asserts/UI_components here components are styled, which will
+   be common to entire application ex:card.styled.tsx, and if we want to customize these components 
+   on basis of module we have to do change through its parent ex: card is modified in Login by
+   its parent(StyledLoginPage)
+
+------------------------------------------------------------------------------
+
+
+   
