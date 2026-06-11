@@ -1,0 +1,7 @@
+{
+  "success": true,
+  "phoneValidation": {
+    "exists": false,
+    "message": "Phone number is available"
+  }
+}

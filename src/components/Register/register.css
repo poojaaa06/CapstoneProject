@@ -1,0 +1,70 @@
+/* Register.css — scoped styles for the Register feature.
+   No inline styles, no CSS-in-JS. */
+
+.register-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: #f5f7fa;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 560px;
+}
+
+.register-card .ant-card-head-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.register-form .ant-form-item {
+  margin-bottom: 16px;
+}
+
+.register-phone-input {
+  width: 100%;
+}
+
+.register-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.register-actions .ant-btn {
+  min-width: 96px;
+}
+
+.register-steps {
+  margin-bottom: 24px;
+}
+
+.register-error {
+  color: #ff4d4f;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Focus-visible outline for keyboard accessibility (WCAG AAA) */
+.register-form :focus-visible {
+  outline: 2px solid #1677ff;
+  outline-offset: 2px;
+}
+
+/* Responsive */
+@media (max-width: 575px) {
+  .register-card {
+    max-width: 100%;
+  }
+  .register-actions {
+    justify-content: stretch;
+  }
+  .register-actions .ant-btn {
+    flex: 1 1 auto;
+  }
+}

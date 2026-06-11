@@ -140,8 +140,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       navigate("/work-instructions");
       setSelectedKey(String(3));
     } else if (items[e.key - 1]?.key == "4") {
-      navigate("/requests");
-      setSelectedKey(String(5));
+      navigate("/dashboard");
+      setSelectedKey(String(4));
     } else if (items[e.key - 1]?.key == "5") {
       navigate("/profile");
       setSelectedKey(String(6));
