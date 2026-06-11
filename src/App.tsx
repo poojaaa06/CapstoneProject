@@ -31,12 +31,9 @@ function App() {
                   path="maintenance-orders"
                   element={<MaintenanceOrders />}
                 />
-                <Route
-                  path="work-instructions"
-                  element={<WorkInstructions />}
-                />
+                <Route path="work-instructions" element={<WorkInstructions />}/>
                 <Route path="requests" element={<MyRequests />} />
-                <Route path="profile" element={<Dashboard />} />
+                <Route path="profile" element={<Profile />} />
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
