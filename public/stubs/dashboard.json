@@ -1,0 +1,230 @@
+
+{
+  "metrics": [
+    {
+      "id": "1",
+      "title": "Total Requests",
+      "value": "1,247",
+      "trend": 12.5,
+      "trendLabel": "vs last month",
+      "iconName": "FileTextOutlined",
+      "accentColor": "#2563eb"
+    },
+    {
+      "id": "2",
+      "title": "Pending Approvals",
+      "value": "23",
+      "trend": -5.2,
+      "trendLabel": "vs last month",
+      "iconName": "ClockCircleOutlined",
+      "accentColor": "#d97706"
+    },
+    {
+      "id": "3",
+      "title": "Items Delivered",
+      "value": "892",
+      "trend": 18.3,
+      "trendLabel": "vs last month",
+      "iconName": "CheckCircleOutlined",
+      "accentColor": "#16a34a"
+    },
+    {
+      "id": "4",
+      "title": "Active Users",
+      "value": "156",
+      "trend": 7.8,
+      "trendLabel": "vs last month",
+      "iconName": "UserOutlined",
+      "accentColor": "#7c3aed"
+    }
+  ],
+  "activities": [
+    {
+      "id": "1",
+      "user": "John Doe",
+      "initials": "JD",
+      "action": "submitted",
+      "target": "Compressor Assembly",
+      "timestamp": "2024-01-15T08:30:00Z",
+      "status": "success",
+      "department": "Engineering"
+    },
+    {
+      "id": "2",
+      "user": "Jane Smith",
+      "initials": "JS",
+      "action": "approved",
+      "target": "Fan Blade Unit",
+      "timestamp": "2024-01-15T05:30:00Z",
+      "status": "success",
+      "department": "Management"
+    },
+    {
+      "id": "3",
+      "user": "Mike Johnson",
+      "initials": "MJ",
+      "action": "requested",
+      "target": "Electronic Controller",
+      "timestamp": "2024-01-14T10:30:00Z",
+      "status": "pending",
+      "department": "Production"
+    },
+    {
+      "id": "4",
+      "user": "Sarah Williams",
+      "initials": "SW",
+      "action": "rejected",
+      "target": "Coolant Pump",
+      "timestamp": "2024-01-13T10:30:00Z",
+      "status": "failed",
+      "department": "Quality"
+    },
+    {
+      "id": "5",
+      "user": "Robert Brown",
+      "initials": "RB",
+      "action": "delivered",
+      "target": "Mounting Brackets",
+      "timestamp": "2024-01-12T10:30:00Z",
+      "status": "success",
+      "department": "Logistics"
+    },
+    {
+      "id": "6",
+      "user": "Emily Chen",
+      "initials": "EC",
+      "action": "commented on",
+      "target": "Hydraulic System",
+      "timestamp": "2024-01-11T10:30:00Z",
+      "status": "success",
+      "department": "Engineering"
+    }
+  ],
+  "requests": [
+    {
+      "id": "REQ-001",
+      "partName": "Hydraulic Pump",
+      "quantity": 3,
+      "status": "Pending",
+      "requestedOn": "2024-01-15",
+      "department": "Maintenance",
+      "urgency": "High",
+      "requestedBy": "John Smith"
+    },
+    {
+      "id": "REQ-002",
+      "partName": "Pressure Gauge",
+      "quantity": 5,
+      "status": "Approved",
+      "requestedOn": "2024-01-14",
+      "department": "Quality Control",
+      "urgency": "Medium",
+      "requestedBy": "Alice Johnson"
+    },
+    {
+      "id": "REQ-003",
+      "partName": "Drive Belt",
+      "quantity": 2,
+      "status": "Delivered",
+      "requestedOn": "2024-01-13",
+      "department": "Production",
+      "urgency": "Low",
+      "requestedBy": "Bob Wilson"
+    },
+    {
+      "id": "REQ-004",
+      "partName": "Control Valve",
+      "quantity": 1,
+      "status": "Pending",
+      "requestedOn": "2024-01-12",
+      "department": "Engineering",
+      "urgency": "High",
+      "requestedBy": "Carol Davis"
+    },
+    {
+      "id": "REQ-005",
+      "partName": "Temperature Sensor",
+      "quantity": 4,
+      "status": "Approved",
+      "requestedOn": "2024-01-11",
+      "department": "Quality Control",
+      "urgency": "Medium",
+      "requestedBy": "David Brown"
+    },
+    {
+      "id": "REQ-006",
+      "partName": "Filter Assembly",
+      "quantity": 6,
+      "status": "Delivered",
+      "requestedOn": "2024-01-10",
+      "department": "Maintenance",
+      "urgency": "Low",
+      "requestedBy": "Emma Wilson"
+    }
+  ],
+  "trends": [
+    { "month": "Jan", "submitted": 85, "approved": 72, "delivered": 60 },
+    { "month": "Feb", "submitted": 92, "approved": 80, "delivered": 68 },
+    { "month": "Mar", "submitted": 78, "approved": 65, "delivered": 70 },
+    { "month": "Apr", "submitted": 105, "approved": 88, "delivered": 75 },
+    { "month": "May", "submitted": 98, "approved": 85, "delivered": 80 },
+    { "month": "Jun", "submitted": 112, "approved": 95, "delivered": 88 },
+    { "month": "Jul", "submitted": 120, "approved": 102, "delivered": 95 },
+    { "month": "Aug", "submitted": 135, "approved": 118, "delivered": 108 },
+    { "month": "Sep", "submitted": 142, "approved": 125, "delivered": 115 },
+    { "month": "Oct", "submitted": 158, "approved": 140, "delivered": 130 },
+    { "month": "Nov", "submitted": 165, "approved": 148, "delivered": 138 },
+    { "month": "Dec", "submitted": 180, "approved": 162, "delivered": 150 }
+  ],
+  "deptStats": [
+    { "name": "Maintenance", "value": 45, "color": "#2563eb" },
+    { "name": "Production", "value": 32, "color": "#16a34a" },
+    { "name": "Quality Control", "value": 28, "color": "#d97706" },
+    { "name": "Engineering", "value": 24, "color": "#7c3aed" },
+    { "name": "Logistics", "value": 18, "color": "#dc2626" }
+  ],
+  "statusData": [
+    { "status": "Delivered", "count": 892, "color": "#16a34a" },
+    { "status": "Approved", "count": 187, "color": "#2563eb" },
+    { "status": "Pending", "count": 23, "color": "#d97706" },
+    { "status": "Rejected", "count": 145, "color": "#dc2626" }
+  ],
+  "quickStats": [
+    {
+      "id": "1",
+      "label": "Approval Rate",
+      "value": "78%",
+      "sublabel": "+5.2% from last month",
+      "color": "#16a34a",
+      "bgColor": "#f0fdf4",
+      "borderColor": "#bbf7d0"
+    },
+    {
+      "id": "2",
+      "label": "Avg. Processing",
+      "value": "2.4 days",
+      "sublabel": "-0.3 days improvement",
+      "color": "#d97706",
+      "bgColor": "#fffbeb",
+      "borderColor": "#fde68a"
+    },
+    {
+      "id": "3",
+      "label": "High Priority Open",
+      "value": "8",
+      "sublabel": "of 23 pending items",
+      "color": "#dc2626",
+      "bgColor": "#fef2f2",
+      "borderColor": "#fecaca"
+    },
+    {
+      "id": "4",
+      "label": "Peak Hour",
+      "value": "2–3 PM",
+      "sublabel": "42 users active today",
+      "color": "#7c3aed",
+      "bgColor": "#faf5ff",
+      "borderColor": "#e9d5ff"
+    }
+  ]
+}
