@@ -1,793 +1,888 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Formik, FormikHelpers, FormikProps } from "formik";
+import * as Yup from "yup";
+import dayjs, { Dayjs } from "dayjs";
+import {
+  Card,
+  Form,
+  Input,
+  Select,
+  DatePicker,
+  Checkbox,
+  Button,
+  Row,
+  Col,
+  Steps,
+  Typography,
+  message,
+} from "antd";
+
 import { registerAPI } from "src/services/registerAPI";
 import { validateUsername } from "src/services/validateUsernameAPI";
 import { validateEmail } from "src/services/validateEmailAPI";
 import { validatePhone } from "src/services/validatePhoneAPI";
-import type { CascaderProps } from "antd";
 import {
- 
-  Checkbox,
-  Form,
-  Input,
+  GENDER_OPTIONS,
+  COUNTRY_OPTIONS,
+  PHONE_PREFIX_OPTIONS,
+} from "../../stubs/registerStubs";
 
-  Select,
-  DatePicker,
-  Typography,
-} from "antd";
-import CryptoJS from "crypto-js";
-import codes from "../../utils/codes.json";
-import CustomCard from "src/asserts/UI_components/Card/card.styled";
-import { StyledRegisterPage } from "./register.styled";
-import StyledButton from "src/asserts/UI_components/ButtonComponent/button.styled";
-import { ToastMessage } from "src/asserts/UI_components/ToastMessage.tsx/toastMessage.styled";
+import "./register.css";
 
-const SECRET_KEY = "CagHKozTTJqLffF8KJChNp4926AQ8pRe";
-const { Text } = Typography;
-const { Option } = Select;
+const { Title } = Typography;
 
-interface PrefixOption {
-  label: string;
-  value: string;
-  key: string;
-}
+/* ------------------------------------------------------------------ */
+/*  Types                                                              */
+/* ------------------------------------------------------------------ */
 
-interface DataNodeType {
-  value: string;
-  label: string;
-  children?: DataNodeType[];
-}
-
-type FormFields = {
+export interface RegisterFormValues {
   user_unique_id: string;
   user_first_name: string;
   user_middle_name?: string;
   user_last_name: string;
+  user_gender: string;
+  user_dob: Dayjs | null;
+
   user_email: string;
-  user_password: string;
-  confirm_password: string;
   prefix: string;
   user_phone: string;
-  user_dob: any;
-  user_gender: string;
+  user_password: string;
+  confirm_password: string;
+
   user_bio?: string;
   user_img?: string;
-  user_country?: string;
+  user_country: string;
   user_state?: string;
   user_city?: string;
   user_pincode?: string;
   user_landmark?: string;
-  user_address?: string;
+  user_address?: string[];
   user_agreement: boolean;
-  user_role?: string;
-  user_verified?: boolean;
-  user_active?: boolean;
-  user_org_limit?: number;
+}
+
+const initialValues: RegisterFormValues = {
+  user_unique_id: "",
+  user_first_name: "",
+  user_middle_name: "",
+  user_last_name: "",
+  user_gender: "",
+  user_dob: null,
+  user_email: "",
+  prefix: "91",
+  user_phone: "",
+  user_password: "",
+  confirm_password: "",
+  user_bio: "",
+  user_img: "",
+  user_country: "",
+  user_state: "",
+  user_city: "",
+  user_pincode: "",
+  user_landmark: "",
+  user_address: [],
+  user_agreement: false,
 };
 
-const residences: CascaderProps<DataNodeType>["options"] = [
-  {
-    value: "zhejiang",
-    label: "Zhejiang",
-    children: [
-      {
-        value: "hangzhou",
-        label: "Hangzhou",
-        children: [
-          {
-            value: "xihu",
-            label: "West Lake",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    value: "jiangsu",
-    label: "Jiangsu",
-    children: [
-      {
-        value: "nanjing",
-        label: "Nanjing",
-        children: [
-          {
-            value: "zhonghuamen",
-            label: "Zhong Hua Men",
-          },
-        ],
-      },
-    ],
-  },
+/* ------------------------------------------------------------------ */
+/*  Validation                                                         */
+/* ------------------------------------------------------------------ */
+
+const minAge = 13;
+const minDob = dayjs().subtract(minAge, "year");
+
+// Use 'any' for schema type to avoid complex generic mismatches
+const stepSchemas: any[] = [
+  // Step 1: identity
+  Yup.object({
+    user_unique_id: Yup.string()
+      .trim()
+      .required("Username is required")
+      .min(3, "Username must be at least 3 characters")
+      .max(50, "Username must be at most 50 characters")
+      .matches(/^[a-zA-Z0-9_]+$/, "Username must be alphanumeric"),
+    user_first_name: Yup.string()
+      .trim()
+      .required("First name is required")
+      .min(2, "First name must be at least 2 characters")
+      .max(50, "First name must be at most 50 characters")
+      .matches(/^[a-zA-Z ]+$/, "First name must contain letters only"),
+    user_middle_name: Yup.string()
+      .trim()
+      .max(50, "Middle name must be at most 50 characters")
+      .matches(/^[a-zA-Z ]*$/, "Middle name must contain letters only"),
+    user_last_name: Yup.string()
+      .trim()
+      .required("Last name is required")
+      .min(2, "Last name must be at least 2 characters")
+      .max(50, "Last name must be at most 50 characters")
+      .matches(/^[a-zA-Z ]+$/, "Last name must contain letters only"),
+    user_gender: Yup.string().required("Please select your gender"),
+    user_dob: Yup.mixed<Dayjs>()
+      .required("Date of birth is required")
+      .test("min-age", `You must be at least ${minAge} years old`, (value) =>
+        value ? (value as Dayjs).isBefore(minDob) : false
+      ),
+  }),
+
+  // Step 2: contact + credentials
+  Yup.object({
+    user_email: Yup.string()
+      .trim()
+      .required("Email is required")
+      .email("Please enter a valid email"),
+    prefix: Yup.string().required("Country code is required"),
+    user_phone: Yup.string()
+      .trim()
+      .required("Phone number is required")
+      .matches(/^\d{7,15}$/, "Phone must be 7–15 digits, numbers only"),
+    user_password: Yup.string()
+      .required("Password is required")
+      .min(8, "Password must be at least 8 characters")
+      .matches(
+        /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/,
+        "Password must include an uppercase letter, a number and a special character"
+      ),
+    confirm_password: Yup.string()
+      .required("Please confirm your password")
+      .oneOf([Yup.ref("user_password")], "Passwords do not match"),
+  }),
+
+  // Step 3: profile/address
+  Yup.object({
+    user_bio: Yup.string().max(200, "Bio cannot exceed 200 characters"),
+    user_img: Yup.string().max(2048, "URL too long"),
+    user_country: Yup.string().required("Please select your country"),
+    user_state: Yup.string().max(200, "State too long"),
+    user_city: Yup.string().max(200, "City too long"),
+    user_pincode: Yup.string().matches(
+      /^\d{5,10}$/,
+      "Pincode must be 5–10 digits"
+    ),
+    user_landmark: Yup.string().max(200, "Landmark too long"),
+    user_address: Yup.array().of(Yup.string()),
+    user_agreement: Yup.boolean().oneOf(
+      [true],
+      "You must accept the Terms & Conditions"
+    ),
+  }),
 ];
 
-const formItemLayout = {
-  labelCol: {
-    xs: { span: 24 },
-    sm: { span: 10 },
-  },
-  wrapperCol: {
-    xs: { span: 24 },
-    sm: { span: 16 },
-  },
-};
+/* ------------------------------------------------------------------ */
+/*  Component                                                          */
+/* ------------------------------------------------------------------ */
 
-const tailFormItemLayout = {
-  wrapperCol: {
-    xs: {
-      span: 24,
-      offset: 0,
-    },
-    sm: {
-      span: 16,
-      offset: 8,
-    },
-  },
-};
+const TOTAL_STEPS = 3;
 
-export default function RegisterPage() {
+const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
-  const [isUsernameAvailable, setIsUsernameAvailable] = useState(false);
+  const [step, setStep] = useState<number>(0);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+
+  // Async server-side validators (debounced via blur)
   const [usernameError, setUsernameError] = useState<string | null>(null);
-  const [isEmailAvailable, setIsEmailAvailable] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
-  const [isPhoneAvailable, setIsPhoneAvailable] = useState(false);
   const [phoneError, setPhoneError] = useState<string | null>(null);
 
-  const handleUsernameBlur = async (username: string) => {
-    console.log("username", username);
+  const handleUsernameBlur = useCallback(async (username: string) => {
+    if (!username || username.length < 3) return;
     try {
-      // Call the validateUsername API with the entered username
-      const response = await validateUsername(username);
-
-      if (response.success && response.usernameValidation) {
-        if (response.usernameValidation.exists) {
-          setIsUsernameAvailable(false);
-          setUsernameError(
-            "Username already exists, Please select another one"
-          );
-        } else {
-          setIsUsernameAvailable(true);
-          setUsernameError(null);
-        }
+      const res = await validateUsername(username);
+      if (res?.success && res.usernameValidation?.exists) {
+        setUsernameError("Username already exists, please choose another");
+      } else {
+        setUsernameError(null);
       }
-    } catch (error) {
-      console.error("Error validating username:", error);
+    } catch (err) {
+      console.error("Username validation failed:", err);
     }
-  };
-
-  const handleEmailBlur = async (email: string) => {
-    console.log("email", email);
-    try {
-      // Call the validateEmail API with the entered email
-      const response = await validateEmail(email);
-      
-      if (response.success && response.emailValidation) {
-        if (response.emailValidation.exists) {
-          setIsEmailAvailable(false);
-          setEmailError("email already exists, Please select another one");
-        } else {
-          setIsEmailAvailable(true);
-          setEmailError(null);
-        }
-      }
-    } catch (error) {
-      console.error("Error validating email:", error);
-    }
-  };
-  const handlePhoneBlur = async (phone: string) => {
-    console.log("phone", phone);
-    try {
-      // Call the validatePhone API with the entered phone
-      const response = await validatePhone(phone);
-      
-      if (response.success && response.phoneValidation) {
-        if (response.usernameValidation.exists) {
-          setIsPhoneAvailable(false);
-          setPhoneError("Phone already exists, Please select another one");
-        } else {
-          setIsPhoneAvailable(true);
-          setPhoneError(null);
-        }
-      }
-    } catch (error) {
-      console.error("Error validating phone:", error);
-    }
-  };
-
-  const [formCurrentStep, setFormCurrentStep] = useState(1);
-  const [finalFormFieldsData, setFinalFormFieldsData] = useState<FormFields>({
-    user_unique_id: "",
-    user_first_name: "",
-    user_middle_name: "",
-    user_last_name: "",
-    user_email: "",
-    user_password: "",
-    confirm_password: "",
-    prefix: "",
-    user_phone: "",
-    user_dob: "",
-    user_gender: "",
-    user_bio: "",
-    user_img: "",
-    user_country: "",
-    user_state: "",
-    user_city: "",
-    user_pincode: "",
-    user_landmark: "",
-    user_address: "",
-    user_agreement: false,
-    user_role: "",
-    user_verified: false,
-    user_active: true,
-    user_org_limit: 1,
-  });
-  const [prefixOptions, setPrefixOptions] = useState<PrefixOption[]>([]);
-  const [form] = Form.useForm();
-
-  useEffect(() => {
-    console.log("Final Step Data Updated:", finalFormFieldsData);
-    console.log("username: ", finalFormFieldsData.user_unique_id);
-    console.log("user first name: ", finalFormFieldsData.user_first_name);
-    console.log("user middle name: ", finalFormFieldsData.user_middle_name);
-    console.log("user last name: ", finalFormFieldsData.user_last_name);
-    console.log("email: ", finalFormFieldsData.user_email);
-    console.log("password: ", finalFormFieldsData.user_password);
-    console.log("confirm: ", finalFormFieldsData.confirm_password);
-    console.log("prefix: ", finalFormFieldsData.prefix);
-    console.log("phone: ", finalFormFieldsData.user_phone);
-    console.log("dob: ", finalFormFieldsData?.user_dob);
-    console.log("gender: ", finalFormFieldsData.user_gender);
-    console.log("bio: ", finalFormFieldsData.user_bio);
-    console.log("image: ", finalFormFieldsData.user_img);
-    console.log("user_country: ", finalFormFieldsData.user_country);
-    console.log("user_state: ", finalFormFieldsData.user_state);
-    console.log("user_city: ", finalFormFieldsData.user_city);
-    console.log("user_pincode: ", finalFormFieldsData.user_pincode);
-    console.log("user_landmark: ", finalFormFieldsData.user_landmark);
-    console.log("address: ", finalFormFieldsData.user_address);
-    console.log("agreement: ", finalFormFieldsData.user_agreement);
-  }, [finalFormFieldsData, formCurrentStep]);
-
-  const onFinish = async (values: any) => {
-    const currentValues = form.getFieldsValue();
-
-    if (formCurrentStep === 1) {
-      console.log("Step 1 values:", form.getFieldsValue(), finalFormFieldsData);
-      setFinalFormFieldsData({ ...finalFormFieldsData, ...currentValues });
-      setFormCurrentStep(2);
-      return;
-    } else if (formCurrentStep === 2) {
-      console.log("Step 2 values:", form.getFieldsValue(), finalFormFieldsData);
-      setFinalFormFieldsData({ ...finalFormFieldsData, ...currentValues });
-      setFormCurrentStep(3);
-      return;
-    } else {
-      setFinalFormFieldsData({ ...finalFormFieldsData, ...currentValues });
-      const mergedFinalFormData = { ...finalFormFieldsData, ...currentValues };
-      // Encrypt the password
-      const encryptedPassword = CryptoJS.AES.encrypt(
-        mergedFinalFormData.user_password || "",
-        SECRET_KEY
-      ).toString();
-      const formData = {
-        user_unique_id: mergedFinalFormData.user_unique_id,
-        user_first_name: mergedFinalFormData.user_first_name,
-        user_middle_name: mergedFinalFormData.user_middle_name,
-        user_last_name: mergedFinalFormData.user_last_name,
-        user_email: mergedFinalFormData.user_email,
-        user_password: encryptedPassword,
-        prefix: mergedFinalFormData.prefix,
-        user_phone: mergedFinalFormData.user_phone,
-        user_dob: mergedFinalFormData.user_dob
-          ? mergedFinalFormData.user_dob.$d
-          : null,
-        user_gender: mergedFinalFormData.user_gender,
-        user_bio: mergedFinalFormData.user_bio,
-        user_img: mergedFinalFormData.user_img,
-        user_country: mergedFinalFormData.user_country,
-        user_state: mergedFinalFormData.user_state,
-        user_city: mergedFinalFormData.user_city,
-        user_pincode: mergedFinalFormData.user_pincode,
-        user_landmark: mergedFinalFormData.user_landmark,
-        user_address: mergedFinalFormData.user_address,
-        user_agreement: mergedFinalFormData.user_agreement,
-        // user_role set as admin in BE
-        user_verified: "false", // need to change based on verification
-        user_active: true,
-        user_org_limit: 1,
-      };
-
-      try {
-        const response = await registerAPI(formData);
-        console.log("---res", response);
-        if (
-          (response && response?.status === 200) ||
-          response?.status === 201 ||
-          response?.success === true //TODO: status is not coming: CHAITANYA
-        ) {
-          // TODO: which all status codes will come?
-          // setUserDetails(response.data) TODO: After register user needs to start from login
-          ToastMessage.success("User created successfully", 3);
-          navigate("/");
-        }
-      } catch (err) {
-        ToastMessage.error("Something went wrong please try again", 3);
-      }
-    }
-  };
-
-  useEffect(() => {
-    // Load the country prefix codes from the JSON file
-    const loadPrefixOptions = () => {
-      const options = codes.map((country) => ({
-        label: `${country.countryTelephonyCode} (${country.fullCountryName})`,
-        value: country.countryTelephonyCode,
-        key: country.shortCountryName,
-      }));
-      setPrefixOptions(options);
-    };
-
-    loadPrefixOptions();
   }, []);
 
-  const prefixSelector = (
-    <Form.Item name="prefix" noStyle>
-      <Select style={{ width: 75 }}>
-        {prefixOptions.map((option) => (
-          <Option key={option.key} value={option.value}>
-            {option.label}
-          </Option>
-        ))}
-      </Select>
-    </Form.Item>
-  );
+  const handleEmailBlur = useCallback(async (email: string) => {
+    if (!email) return;
+    try {
+      const res = await validateEmail(email);
+      if (res?.success && res.emailValidation?.exists) {
+        setEmailError("Email already exists, please use another");
+      } else {
+        setEmailError(null);
+      }
+    } catch (err) {
+      console.error("Email validation failed:", err);
+    }
+  }, []);
 
-  const gerRegisterActions = () => {
-    if (formCurrentStep === 1) {
-      return [
-        <StyledButton onClick={() => navigate("/")}>
-          Back to Login
-        </StyledButton>,
-        <Form.Item {...tailFormItemLayout}>
-          <StyledButton color="default" variant="text" htmlType="submit">
-            Next
-          </StyledButton>
-        </Form.Item>,
-      ];
+  const handlePhoneBlur = useCallback(async (phone: string) => {
+    if (!phone) return;
+    try {
+      const res = await validatePhone(phone);
+      if (res?.success && res.phoneValidation?.exists) {
+        setPhoneError("Phone number already registered");
+      } else {
+        setPhoneError(null);
+      }
+    } catch (err) {
+      console.error("Phone validation failed:", err);
     }
-    if (formCurrentStep === 2) {
-      return [
-        <StyledButton
-          onClick={() => {
-            setFormCurrentStep(1);
-          }}
-        >
-          Back
-        </StyledButton>,
+  }, []);
 
-        <Form.Item {...tailFormItemLayout}>
-          <StyledButton variant="text" htmlType="submit">
-            Next
-          </StyledButton>
-        </Form.Item>,
-      ];
-    }
-    if (formCurrentStep === 3) {
-      return [
-        <StyledButton
-          type="text"
-          onClick={() => {
-            setFormCurrentStep(2);
-          }}
-        >
-          Back
-        </StyledButton>,
-        <Form.Item {...tailFormItemLayout}>
-          <StyledButton variant="text" htmlType="submit">
-            Submit
-          </StyledButton>
-        </Form.Item>,
-      ];
-    }
+  /* ----------------------- submit handler ------------------------- */
+
+ const handleSubmit = async (
+  values: RegisterFormValues,
+  helpers: FormikHelpers<RegisterFormValues>
+): Promise<void> => {
+  // Block server-busy duplicates
+  if (usernameError || emailError || phoneError) {
+    message.error("Please resolve the highlighted errors before submitting.");
+    return;
+  }
+
+  if (step < TOTAL_STEPS - 1) {
+    setStep((s) => s + 1);
+    helpers.setTouched({});
+    helpers.setSubmitting(false);
+    return;
+  }
+
+  setSubmitting(true);
+  try {
+    const payload = {
+      user_unique_id: values.user_unique_id,
+      user_first_name: values.user_first_name,
+      user_middle_name: values.user_middle_name || undefined,
+      user_last_name: values.user_last_name,
+      user_email: values.user_email,
+      user_password: values.user_password,
+      prefix: values.prefix,
+      user_phone: values.user_phone,
+      user_dob: values.user_dob ? values.user_dob.toISOString() : null,
+      user_gender: values.user_gender,
+      user_bio: values.user_bio || undefined,
+      user_img: values.user_img || undefined,
+      user_country: values.user_country,
+      user_state: values.user_state || undefined,
+      user_city: values.user_city || undefined,
+      user_pincode: values.user_pincode || undefined,
+      user_landmark: values.user_landmark || undefined,
+      user_address: values.user_address || undefined,
+      user_agreement: values.user_agreement,
+      user_verified: "false",
+      user_active: true,
+      user_org_limit: 1,
+    };
+
+    const response = await registerAPI(payload);
+    const ok =
+      response?.status === 200 ||
+      response?.status === 201 ||
+      response?.success === true;
+
+    if (ok) {
+  // ========== PREPARE USER DATA ==========
+  const userDataForLocal = {
+    user_unique_id: values.user_unique_id,
+    user_first_name: values.user_first_name,
+    user_middle_name: values.user_middle_name || "",
+    user_last_name: values.user_last_name,
+    user_gender: values.user_gender,
+    user_dob: values.user_dob ? values.user_dob.format("YYYY-MM-DD") : null,
+    user_email: values.user_email,
+    user_phone: values.user_phone,
+    prefix: values.prefix,
+    user_bio: values.user_bio || "",
+    user_img: values.user_img || "",
+    user_country: values.user_country,
+    user_state: values.user_state || "",
+    user_city: values.user_city || "",
+    user_pincode: values.user_pincode || "",
+    user_landmark: values.user_landmark || "",
+    user_address: values.user_address || [],
+    registeredAt: new Date().toISOString(),
+    isLoggedIn: true,
+    user_password: values.user_password,
   };
 
-  return (
-    <StyledRegisterPage>
-      <Form
-        {...formItemLayout}
-        form={form}
-        name="register"
-        onFinish={onFinish}
-        initialValues={{
-          residence: ["zhejiang", "hangzhou", "xihu"], //TODO: what is this?
-          prefix: "91",
-        }}
-        style={{ maxWidth: 600 }}
-        scrollToFirstError
-      >
-        <CustomCard
-          title="Register"
-          width={"400px"}
-          actions={gerRegisterActions()}
-        >
-          {formCurrentStep === 1 && (
-            <>
-              <Form.Item
-                name="user_unique_id"
-                label="User Name"
-                tooltip="Username should be unique"
-                validateStatus={usernameError ? "error" : ""}
-                help={usernameError}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your username!",
-                    whitespace: true,
-                  },
-                  {
-                    min: 3,
-                    max: 50,
-                    message: "Username must be between 3 and 50 characters",
-                  },
-                  {
-                    pattern: /^[a-zA-Z0-9]+$/,
-                    message: "Username must be alphanumeric",
-                  },
-                ]}
-              >
-                <Input onBlur={(e) => handleUsernameBlur(e.target.value)} />
-              </Form.Item>
+  // Data for sessionStorage (Profile page format)
+  const userDataForSession = {
+    user_unique_id: values.user_unique_id,
+    user_first_name: values.user_first_name,
+    user_middle_name: values.user_middle_name || "",
+    user_last_name: values.user_last_name,
+    user_gender: values.user_gender,
+    user_dob: values.user_dob ? values.user_dob.format("YYYY-MM-DD") : null,
+    user_email: values.user_email,
+    user_phone: values.user_phone,
+    prefix: values.prefix,
+    user_bio: values.user_bio || "",
+    user_image: values.user_img || "",
+    user_country: values.user_country,
+    user_state: values.user_state || "",
+    user_city: values.user_city || "",
+    user_pincode: values.user_pincode || "",
+    user_landmark: values.user_landmark || "",
+    user_address: values.user_address ? values.user_address.join(', ') : "",
+    user_active: true,
+    user_verified: false,
+    user_org_limit: 1,
+    user_role: "user",
+    isLoggedIn: true,
+    user_password: values.user_password,
+  };
 
-              <Form.Item
-                name="user_first_name"
-                label="First Name"
-                tooltip="What do you want us to call you?"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your first name!",
-                    whitespace: true,
-                  },
-                  {
-                    min: 2,
-                    max: 50,
-                    message: "First name must be between 2 and 50 characters",
-                  },
-                  {
-                    pattern: /^[a-zA-Z]+$/,
-                    message: "First name must contain only letters",
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
+  // Save to localStorage
+  localStorage.setItem("userData", JSON.stringify(userDataForLocal));
+  localStorage.setItem("isLoggedIn", "true");
+  localStorage.setItem("username", values.user_unique_id);
+  
+  // Save to sessionStorage
+  sessionStorage.setItem("userDetails", JSON.stringify(userDataForSession));
+  sessionStorage.setItem("isLoggedIn", "true");
+  sessionStorage.setItem("username", values.user_unique_id);
+  
+  console.log("✅ Data saved to both storages");
+  
+  message.success("Registration successful! Redirecting...");
+  navigate("/dashboard");
+} else {
+      message.error(response?.message ?? "Registration failed. Try again.");
+    }
+  } catch (err) {
+    console.error("Registration error:", err);
+    message.error("Something went wrong. Please try again.");
+  } finally {
+    setSubmitting(false);
+    helpers.setSubmitting(false);
+  }
+};
 
-              <Form.Item
-                name="user_middle_name"
-                label="Middle Name"
-                rules={[
-                  {
-                    whitespace: true,
-                    max: 50,
-                    message: "Middle name cannot exceed 50 characters",
-                  },
-                  {
-                    pattern: /^[a-zA-Z]+$/,
-                    message: "First name must contain only letters",
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
+  /* ----------------------- render helpers ------------------------- */
 
-              <Form.Item
-                name="user_last_name"
-                label="Last Name"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your last name!",
-                    whitespace: true,
-                  },
-                  {
-                    min: 2,
-                    max: 50,
-                    message: "Last name must be between 2 and 50 characters",
-                  },
-                  {
-                    pattern: /^[a-zA-Z]+$/,
-                    message: "Last name must contain only letters",
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                name="user_gender"
-                label="Gender"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please select gender!",
-                  },
-                ]}
-              >
-                <Select placeholder="Select your gender">
-                  <Option value="male">Male</Option>
-                  <Option value="female">Female</Option>
-                  <Option value="other">Other</Option>
-                </Select>
-              </Form.Item>
-              <Form.Item
-                label="Date of Birth"
-                name="user_dob"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your date of birth!",
-                  },
-                  {
-                    type: "date",
-                    message: "Please select a valid date",
-                  },
-                  {
-                    validator: (_, value) => {
-                      if (!value) {
-                        return Promise.resolve();
-                      }
-                      const today = new Date();
-                      const thirteenYearsAgo = new Date(
-                        today.getFullYear() - 13,
-                        today.getMonth(),
-                        today.getDate()
-                      );
-                      if (value.valueOf() > thirteenYearsAgo.getTime()) {
-                        return Promise.reject(
-                          new Error("You must be at least 13 years old.")
-                        );
-                      }
-                      return Promise.resolve();
-                    },
-                  },
-                ]}
-              >
-                <DatePicker
-                  width={300}
-                  disabledDate={(current) =>
-                    current && current.valueOf() > Date.now()
-                  }
-                />
-              </Form.Item>
-            </>
-          )}
-
-          {formCurrentStep === 2 && (
-            <>
-              <Form.Item
-                name="user_email"
-                label="E-mail"
-                rules={[
-                  {
-                    type: "email",
-                    message: "The input is not valid email",
-                  },
-                  {
-                    required: true,
-                    message: "Please input your email!",
-                  },
-                ]}
-              >
-                <Input onBlur={(e) => handleEmailBlur(e.target.value)} />
-              </Form.Item>
-
-              <Form.Item
-                name="user_phone"
-                label="Phone Number"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your phone number!",
-                  },
-                  {
-                    pattern: /^\d{7,15}$/,
-                    message: "Phone number must be between 7 and 15 digits",
-                  },
-                ]}
-              >
-                <Input  />
-                <Input addonBefore={prefixSelector} style={{ width: "100%" }} onBlur={(e) => handlePhoneBlur(e.target.value)} />
-              </Form.Item>
-
-              <Form.Item
-                name="user_password"
-                label="Password"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your password!",
-                  },
-                  {
-                    min: 8,
-                    message: "Password must be at least 8 characters",
-                  },
-                  {
-                    pattern: /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/,
-                    message:
-                      "Password must contain an uppercase letter, a number, and a special character",
-                  },
-                ]}
-                hasFeedback
-              >
-                <Input.Password />
-              </Form.Item>
-
-              <Form.Item
-                name="confirm_password"
-                label="Confirm Password"
-                dependencies={["user_password"]}
-                hasFeedback
-                rules={[
-                  {
-                    required: true,
-                    message: "Please confirm your password!",
-                  },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (!value || getFieldValue("user_password") === value) {
-                        return Promise.resolve();
-                      }
-                      return Promise.reject(
-                        new Error("Passwords do not match!")
-                      );
-                    },
-                  }),
-                ]}
-              >
-                <Input.Password />
-              </Form.Item>
-            </>
-          )}
-
-          {formCurrentStep === 3 && (
-            <>
-              <Form.Item
-                name="user_bio"
-                label="Bio"
-                rules={[
-                  {
-                    whitespace: true,
-                    max: 200,
-                    message: "Bio cannot exceed 200 characters",
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-
-              <Form.Item
-                name="user_img"
-                label="Image"
-                rules={[
-                  {
-                    message: "Please input a valid image URL!",
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-
-              <Form.Item
-                name="user_country"
-                label="Country"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please select your country!",
-                  },
-                ]}
-              >
-                <Select placeholder="Select your country">
-                  <Option value="india">India</Option>
-                  <Option value="other">Other</Option>
-                </Select>
-              </Form.Item>
-              <Form.Item
-                name="user_state"
-                label="State"
-                rules={[
-                  {
-                    whitespace: true,
-                    max: 200,
-                    message: "Please input your state!",
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                name="user_city"
-                label="City"
-                rules={[
-                  {
-                    whitespace: true,
-                    max: 200,
-                    message: "Please input your city!",
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-
-              <Form.Item
-                name="user_pincode"
-                label="Pincode"
-                rules={[
-                  {
-                    whitespace: true,
-                    max: 10,
-                    pattern: /^\d{5,10}$/,
-                    message: "Pincode must be between 5 and 10 digits",
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-
-              <Form.Item
-                name="user_landmark"
-                label="Landmark"
-                rules={[
-                  {
-                    whitespace: true,
-                    max: 200,
-                    message: "Please input your landmark!",
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-
-              <Form.Item
-                name="user_address"
-                label="Address"
-                rules={[
-                  {
-                    whitespace: true,
-
-                    message: "Please input your address!",
-                  },
-                  {
-                    max: 255,
-                    message: "Address cannot exceed 255 characters",
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-
-              <Form.Item
-                name="user_agreement"
-                valuePropName="checked"
-                rules={[
-                  {
-                    validator: (_, value) =>
-                      value
-                        ? Promise.resolve()
-                        : Promise.reject(
-                            new Error("Should accept Terms & Conditions")
-                          ),
-                  },
-                ]}
-                {...tailFormItemLayout}
-              >
-                <Checkbox>
-                  I have read the <a href="#">Terms & Conditions</a>
-                </Checkbox>
-              </Form.Item>
-            </>
-          )}
-        </CustomCard>
-      </Form>
-    </StyledRegisterPage>
+  const stepsItems = useMemo(
+    () => [
+      { title: "Identity" },
+      { title: "Account" },
+      { title: "Profile" },
+    ],
+    []
   );
-}
+
+  return (
+    <main className="register-page" aria-labelledby="register-heading">
+      <Card
+        className="register-card"
+        title={
+          <Title id="register-heading" level={3} style={{ margin: 0 }}>
+            Create your account
+          </Title>
+        }
+      >
+        <Steps
+          className="register-steps"
+          current={step}
+          items={stepsItems}
+          size="small"
+          responsive
+        />
+
+        <Formik<RegisterFormValues>
+          initialValues={initialValues}
+          validationSchema={stepSchemas[step]}
+          onSubmit={handleSubmit}
+          validateOnBlur
+          validateOnChange
+          enableReinitialize={false}
+        >
+          {(formik: FormikProps<RegisterFormValues>) => {
+            const {
+              values,
+              errors,
+              touched,
+              handleChange,
+              handleBlur,
+              setFieldValue,
+              setFieldTouched,
+              submitForm,
+            } = formik;
+
+            const fieldStatus = (
+              name: keyof RegisterFormValues,
+              extra?: string | null
+            ): "" | "error" =>
+              (touched[name] && (errors as Record<string, string>)[name]) ||
+              extra
+                ? "error"
+                : "";
+
+            const fieldHelp = (
+              name: keyof RegisterFormValues,
+              extra?: string | null
+            ): string | undefined => {
+              const e = (errors as Record<string, string>)[name];
+              if (touched[name] && e) return e;
+              if (extra) return extra;
+              return undefined;
+            };
+
+            return (
+              <Form
+                layout="vertical"
+                className="register-form"
+                onFinish={submitForm}
+                noValidate
+                aria-describedby="register-heading"
+              >
+                {/* ---------------- Step 1 ---------------- */}
+                {step === 0 && (
+                  <Row gutter={16}>
+                    <Col xs={24} sm={24}>
+                      <Form.Item
+                        label="Username"
+                        required
+                        validateStatus={fieldStatus(
+                          "user_unique_id",
+                          usernameError
+                        )}
+                        help={fieldHelp("user_unique_id", usernameError)}
+                      >
+                        <Input
+                          id="user_unique_id"
+                          name="user_unique_id"
+                          autoComplete="username"
+                          value={values.user_unique_id}
+                          onChange={handleChange}
+                          onBlur={(e) => {
+                            handleBlur(e);
+                            void handleUsernameBlur(e.target.value.trim());
+                          }}
+                          aria-required="true"
+                          aria-invalid={!!fieldHelp("user_unique_id", usernameError)}
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="First name"
+                        required
+                        validateStatus={fieldStatus("user_first_name")}
+                        help={fieldHelp("user_first_name")}
+                      >
+                        <Input
+                          id="user_first_name"
+                          name="user_first_name"
+                          autoComplete="given-name"
+                          value={values.user_first_name}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          aria-required="true"
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Middle name"
+                        validateStatus={fieldStatus("user_middle_name")}
+                        help={fieldHelp("user_middle_name")}
+                      >
+                        <Input
+                          id="user_middle_name"
+                          name="user_middle_name"
+                          autoComplete="additional-name"
+                          value={values.user_middle_name}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Last name"
+                        required
+                        validateStatus={fieldStatus("user_last_name")}
+                        help={fieldHelp("user_last_name")}
+                      >
+                        <Input
+                          id="user_last_name"
+                          name="user_last_name"
+                          autoComplete="family-name"
+                          value={values.user_last_name}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          aria-required="true"
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Gender"
+                        required
+                        validateStatus={fieldStatus("user_gender")}
+                        help={fieldHelp("user_gender")}
+                      >
+                        <Select
+                          id="user_gender"
+                          aria-label="Gender"
+                          placeholder="Select your gender"
+                          value={values.user_gender || undefined}
+                          onChange={(v) => setFieldValue("user_gender", v)}
+                          onBlur={() => setFieldTouched("user_gender", true)}
+                          options={GENDER_OPTIONS}
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Date of birth"
+                        required
+                        validateStatus={fieldStatus("user_dob")}
+                        help={fieldHelp("user_dob")}
+                      >
+                        <DatePicker
+                          id="user_dob"
+                          aria-label="Date of birth"
+                          className="register-phone-input"
+                          value={values.user_dob}
+                          onChange={(d) => setFieldValue("user_dob", d)}
+                          onBlur={() => setFieldTouched("user_dob", true)}
+                          disabledDate={(current) =>
+                            !!current && current.isAfter(dayjs())
+                          }
+                          format="YYYY-MM-DD"
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                )}
+
+                {/* ---------------- Step 2 ---------------- */}
+                {step === 1 && (
+                  <Row gutter={16}>
+                    <Col xs={24}>
+                      <Form.Item
+                        label="Email"
+                        required
+                        validateStatus={fieldStatus("user_email", emailError)}
+                        help={fieldHelp("user_email", emailError)}
+                      >
+                        <Input
+                          id="user_email"
+                          name="user_email"
+                          type="email"
+                          autoComplete="email"
+                          value={values.user_email}
+                          onChange={handleChange}
+                          onBlur={(e) => {
+                            handleBlur(e);
+                            void handleEmailBlur(e.target.value.trim());
+                          }}
+                          aria-required="true"
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col xs={24}>
+                      <Form.Item
+                        label="Phone number"
+                        required
+                        validateStatus={
+                          fieldStatus("user_phone", phoneError) ||
+                          fieldStatus("prefix")
+                        }
+                        help={
+                          fieldHelp("user_phone", phoneError) ||
+                          fieldHelp("prefix")
+                        }
+                      >
+                        <Input
+                          id="user_phone"
+                          name="user_phone"
+                          inputMode="numeric"
+                          autoComplete="tel-national"
+                          className="register-phone-input"
+                          value={values.user_phone}
+                          onChange={(e) => {
+                            const digits = e.target.value.replace(/\D/g, "");
+                            setFieldValue("user_phone", digits);
+                          }}
+                          onBlur={(e) => {
+                            handleBlur(e);
+                            void handlePhoneBlur(e.target.value.trim());
+                          }}
+                          aria-required="true"
+                          addonBefore={
+                            <Select
+                              aria-label="Country code"
+                              value={values.prefix}
+                              onChange={(v) => setFieldValue("prefix", v)}
+                              options={PHONE_PREFIX_OPTIONS}
+                              style={{ width: 120 }}
+                            />
+                          }
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Password"
+                        required
+                        validateStatus={fieldStatus("user_password")}
+                        help={fieldHelp("user_password")}
+                      >
+                        <Input.Password
+                          id="user_password"
+                          name="user_password"
+                          autoComplete="new-password"
+                          value={values.user_password}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          aria-required="true"
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Confirm password"
+                        required
+                        validateStatus={fieldStatus("confirm_password")}
+                        help={fieldHelp("confirm_password")}
+                      >
+                        <Input.Password
+                          id="confirm_password"
+                          name="confirm_password"
+                          autoComplete="new-password"
+                          value={values.confirm_password}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          aria-required="true"
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                )}
+
+                {/* ---------------- Step 3 ---------------- */}
+                {step === 2 && (
+                  <Row gutter={16}>
+                    <Col xs={24}>
+                      <Form.Item
+                        label="Bio"
+                        validateStatus={fieldStatus("user_bio")}
+                        help={fieldHelp("user_bio")}
+                      >
+                        <Input.TextArea
+                          id="user_bio"
+                          name="user_bio"
+                          rows={3}
+                          maxLength={200}
+                          showCount
+                          value={values.user_bio}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Image URL"
+                        validateStatus={fieldStatus("user_img")}
+                        help={fieldHelp("user_img")}
+                      >
+                        <Input
+                          id="user_img"
+                          name="user_img"
+                          value={values.user_img}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Country"
+                        required
+                        validateStatus={fieldStatus("user_country")}
+                        help={fieldHelp("user_country")}
+                      >
+                        <Select
+                          id="user_country"
+                          aria-label="Country"
+                          placeholder="Select your country"
+                          value={values.user_country || undefined}
+                          onChange={(v) => setFieldValue("user_country", v)}
+                          onBlur={() => setFieldTouched("user_country", true)}
+                          options={COUNTRY_OPTIONS}
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="State"
+                        validateStatus={fieldStatus("user_state")}
+                        help={fieldHelp("user_state")}
+                      >
+                        <Input
+                          id="user_state"
+                          name="user_state"
+                          autoComplete="address-level1"
+                          value={values.user_state}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="City"
+                        validateStatus={fieldStatus("user_city")}
+                        help={fieldHelp("user_city")}
+                      >
+                        <Input
+                          id="user_city"
+                          name="user_city"
+                          autoComplete="address-level2"
+                          value={values.user_city}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Pincode"
+                        validateStatus={fieldStatus("user_pincode")}
+                        help={fieldHelp("user_pincode")}
+                      >
+                        <Input
+                          id="user_pincode"
+                          name="user_pincode"
+                          inputMode="numeric"
+                          autoComplete="postal-code"
+                          value={values.user_pincode}
+                          onChange={(e) =>
+                            setFieldValue(
+                              "user_pincode",
+                              e.target.value.replace(/\D/g, "")
+                            )
+                          }
+                          onBlur={handleBlur}
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Landmark"
+                        validateStatus={fieldStatus("user_landmark")}
+                        help={fieldHelp("user_landmark")}
+                      >
+                        <Input
+                          id="user_landmark"
+                          name="user_landmark"
+                          value={values.user_landmark}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col xs={24}>
+                      <Form.Item
+                        label="Address"
+                        validateStatus={fieldStatus("user_address")}
+                        help={fieldHelp("user_address")}
+                      >
+                        <Input.TextArea
+                          id="user_address"
+                          name="user_address"
+                          rows={2}
+                          maxLength={255}
+                          showCount
+                          autoComplete="street-address"
+                          value={values.user_address && values.user_address.join(', ')}
+                          onChange={(e) => {
+                            const addressArray = e.target.value.split(',').map(s => s.trim());
+                            setFieldValue("user_address", addressArray);
+                          }}
+                          onBlur={handleBlur}
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col xs={24}>
+                      <Form.Item
+                        validateStatus={fieldStatus("user_agreement")}
+                        help={fieldHelp("user_agreement")}
+                      >
+                        <Checkbox
+                          id="user_agreement"
+                          name="user_agreement"
+                          checked={values.user_agreement}
+                          onChange={(e) =>
+                            setFieldValue("user_agreement", e.target.checked)
+                          }
+                          onBlur={() =>
+                            setFieldTouched("user_agreement", true)
+                          }
+                          aria-required="true"
+                        >
+                          I have read the{" "}
+                          <a href="/terms" target="_blank" rel="noreferrer">
+                            Terms &amp; Conditions
+                          </a>
+                        </Checkbox>
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                )}
+
+                {/* ---------------- Actions ---------------- */}
+                <div className="register-actions" role="group" aria-label="Form navigation">
+                  <Button
+                    onClick={() => navigate("/login")}
+                    type="link"
+                    aria-label="Go to login"
+                  >
+                    Already have an account? Sign in
+                  </Button>
+
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {step > 0 && (
+                      <Button
+                        onClick={() => setStep((s) => Math.max(0, s - 1))}
+                        disabled={submitting}
+                      >
+                        Back
+                      </Button>
+                    )}
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      loading={submitting}
+                      onClick={submitForm}
+                    >
+                      {step < TOTAL_STEPS - 1 ? "Next" : "Create account"}
+                    </Button>
+                  </div>
+                </div>
+              </Form>
+            );
+          }}
+        </Formik>
+      </Card>
+    </main>
+  );
+};
+
+export default RegisterPage;

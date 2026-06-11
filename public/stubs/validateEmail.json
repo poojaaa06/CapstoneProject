@@ -1,0 +1,7 @@
+{
+  "success": true,
+  "emailValidation": {
+    "exists": false,
+    "message": "Email is available"
+  }
+}

@@ -1,0 +1,61 @@
+/* src/components/QuickStatCard/QuickStatCard.css */
+.quick-stat-card {
+  border: 1px solid;
+  border-radius: 10px;
+  padding: 14px;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.quick-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.quick-stat-card-mobile {
+  padding: 10px;
+}
+
+.quick-stat-card__value {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.quick-stat-card__value-mobile {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.quick-stat-card__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.quick-stat-card-mobile .quick-stat-card__label {
+  font-size: 11px;
+}
+
+.quick-stat-card__sublabel {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.quick-stat-card-mobile .quick-stat-card__sublabel {
+  font-size: 10px;
+}
+
+/* Tablet styles */
+@media (min-width: 768px) and (max-width: 992px) {
+  .quick-stat-card__value {
+    font-size: 20px;
+  }
+  
+  .quick-stat-card {
+    padding: 12px;
+  }
+}

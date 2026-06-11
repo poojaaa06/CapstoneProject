@@ -1,0 +1,223 @@
+/* src/components/Dashboard/Dashboard.css */
+.dashboard-page {
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 24px;
+}
+
+.dashboard-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.mobile-header {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.header-title-section {
+  flex: 1;
+}
+
+.header-actions {
+  flex-shrink: 0;
+}
+
+.mobile-update-time {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: -8px;
+}
+
+.dashboard-title {
+  margin: 0 !important;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.dashboard-subtitle {
+  font-size: 14px;
+  color: #666;
+}
+
+.dashboard-row {
+  margin-bottom: 24px;
+}
+
+.dashboard-card {
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  height: 100%;
+}
+
+.dashboard-card .ant-card-head {
+  border-bottom: 1px solid #e8edf2;
+  padding: 12px 20px;
+}
+
+.dashboard-card .ant-card-head-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.dashboard-card .ant-card-body {
+  padding: 20px;
+}
+
+/* Mobile card adjustments */
+@media (max-width: 768px) {
+  .dashboard-card .ant-card-head {
+    padding: 10px 16px;
+  }
+  
+  .dashboard-card .ant-card-head-title {
+    font-size: 13px;
+  }
+  
+  .dashboard-card .ant-card-body {
+    padding: 16px;
+  }
+}
+
+/* Activity Feed */
+.activity-item {
+  padding: 12px 0 !important;
+  border-bottom: 1px solid #f0f0f0 !important;
+}
+
+.activity-item:last-child {
+  border-bottom: none !important;
+}
+
+.activity-title {
+  font-size: 13px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.activity-meta {
+  font-size: 12px;
+  color: #8c8c8c;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Urgency Badges */
+.urgency-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.urgency-high {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.urgency-medium {
+  background: #ffedd5;
+  color: #d97706;
+}
+
+.urgency-low {
+  background: #e8edf2;
+  color: #64748b;
+}
+
+/* Mobile View Toggle */
+.mobile-view-toggle {
+  margin-bottom: 16px;
+}
+
+.mobile-view-toggle .ant-segmented {
+  background-color: #f1f5f9;
+}
+
+/* Mobile Activity Drawer */
+.mobile-activity-drawer .ant-drawer-body {
+  padding: 16px;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1024px) {
+  .dashboard-page {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-page {
+    padding: 16px;
+  }
+  
+  .dashboard-title {
+    font-size: 20px;
+  }
+  
+  .dashboard-row {
+    margin-bottom: 16px;
+  }
+  
+  .activity-title {
+    font-size: 12px;
+  }
+  
+  .activity-meta {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboard-page {
+    padding: 12px;
+  }
+  
+  .dashboard-header {
+    margin-bottom: 16px;
+  }
+  
+  .header-actions .ant-btn {
+    font-size: 12px;
+  }
+}
+
+/* Touch improvements for mobile */
+@media (max-width: 768px) {
+  .ant-btn {
+    min-height: 36px;
+  }
+  
+  .ant-pagination-item {
+    min-width: 36px;
+    height: 36px;
+    line-height: 34px;
+  }
+  
+  .ant-table-cell {
+    padding: 12px 8px !important;
+  }
+  
+  .activity-item {
+    cursor: pointer;
+  }
+  
+  .activity-item:active {
+    background-color: #f5f5f5;
+  }
+}

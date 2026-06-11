@@ -1,0 +1,108 @@
+/* src/components/MetricCard/MetricCard.css */
+.metric-card {
+  background: #ffffff;
+  border: 1px solid #e8edf2;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.metric-card-mobile {
+  padding: 14px;
+  gap: 12px;
+}
+
+.metric-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.metric-card-mobile .metric-card__icon {
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+}
+
+.metric-card__content {
+  flex: 1;
+  min-width: 0; /* Prevents overflow */
+}
+
+.metric-card__title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.metric-card-mobile .metric-card__title {
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.metric-card__value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 8px;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.metric-card__value-mobile {
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+
+.metric-card__trend {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.metric-card-mobile .metric-card__trend {
+  font-size: 11px;
+}
+
+.metric-card__trend--up {
+  color: #16a34a;
+}
+
+.metric-card__trend--down {
+  color: #dc2626;
+}
+
+/* Tablet styles */
+@media (min-width: 768px) and (max-width: 992px) {
+  .metric-card {
+    padding: 16px;
+  }
+  
+  .metric-card__value {
+    font-size: 24px;
+  }
+  
+  .metric-card__icon {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+  }
+}
