@@ -22,3 +22,12 @@ export interface UserSummary {
 export interface SummaryApiResponse {
   userSummary: UserSummary;
 }
+
+export interface ForgotPasswordFormValues {
+  user_unique_id: string;
+}
+
+export interface ForgotPasswordApiResponse {
+  success: boolean;
+  message: string;
+}

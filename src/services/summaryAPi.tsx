@@ -1,22 +1,29 @@
-import { apiClient } from "src/api/apiClient";
+import axiosInstance from "src/api/axiosInstance";
 import Endpoints from "src/api/endpoints";
+import { devEnv } from "src/utils/constants";
 
 type sessionId = string;
 
-export const getSummaryAPI= async (sessionId: sessionId) => {
+export const getSummaryAPI = async (sessionId: sessionId) => {
   try {
-    const response = await apiClient(
-      "get",
-      Endpoints.GET_SUMMARY,
-      {},
-      {
+    const isDevEnv = process.env.REACT_APP_ENVIRONMENT === devEnv.DEV;
+    
+    let response;
+    if (isDevEnv) {
+      // Development: Use GET for stub file (no auth needed)
+      response = await axiosInstance.get(Endpoints.GET_SUMMARY);
+    } else {
+      // Production: Use GET with auth header
+      response = await axiosInstance.get(Endpoints.GET_SUMMARY, {
         headers: {
           Authorization: `Bearer ${sessionId}`,
         },
-      }
-    );
-    return response.data;
+      });
+    }
+    
+    return response; // Return full response
   } catch (error) {
-    // throw new Error("Error fetching summary:", error);
+    console.error("Error fetching summary:", error);
+    throw error; // Always throw error so it can be caught by the caller
   }
-  }
+};

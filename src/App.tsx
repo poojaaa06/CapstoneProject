@@ -16,6 +16,9 @@ import Assets from "./components/Assets";
 import MaintenanceOrders from "./components/MaintenanceOrders";
 import WorkInstructions from "./components/WorkInstructions";
 import MyRequests from "./components/MyRequests";
+import ForgotPassword from "src/components/ForgotPassword";
+
+
  
 function App() {
   return (
@@ -38,6 +41,7 @@ function App() {
                 </Route>
  
                 <Route path="*" element={<NotFoundPage />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
               </Routes>
             </ThemeProvider>
           </Router>

@@ -14,7 +14,7 @@ import {
   notification,
 } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
- 
+
 import { useAppContext } from "src/context/appContext";
 import { loginSchema } from "src/validations/loginSchema";
 import { loginAPI } from "src/services/loginApi";
@@ -24,42 +24,82 @@ import {
   LoginApiResponse,
   SummaryApiResponse,
 } from "src/types/auth.type";
- 
+
 import "./login.css";
- 
+
 const SECRET_KEY: string = process.env.REACT_APP_SECRET_KEY ?? "";
- 
+
 const initialValues: LoginFormValues = {
   user_unique_id: "",
   user_password: "",
   remember: true,
 };
- 
+
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { setUserDetails } = useAppContext();
- 
-  const fetchSummary = async (sessionId: string): Promise<void> => {
-    try {
-      const summary: SummaryApiResponse = await getSummaryAPI(sessionId);
- 
-      setUserDetails(summary.userSummary);
- 
-      sessionStorage.setItem(
-        "userDetails",
-        JSON.stringify(summary.userSummary),
-      );
- 
+
+const fetchSummary = async (sessionId: string): Promise<void> => {
+  try {
+    const response = await getSummaryAPI(sessionId);
+    const summaryData = response?.data?.userSummary || response?.data?.data?.userSummary;
+    
+    console.log("Summary data received:", summaryData);
+    
+    if (summaryData) {
+      // ✅ Add the SAME hardcoded roles and services as registration
+      const sessionUserDetails = {
+        user_unique_id: summaryData.user_unique_id,
+        user_first_name: summaryData.user_first_name,
+        user_middle_name: summaryData.user_middle_name || "",
+        user_last_name: summaryData.user_last_name,
+        user_email: summaryData.user_email,
+        user_phone: summaryData.user_phone,
+        user_img: summaryData.user_img || "",
+        user_image: summaryData.user_img || "",
+        user_bio: summaryData.user_bio || "",
+        user_country: summaryData.user_country || "",
+        user_state: summaryData.user_state || "",
+        user_city: summaryData.user_city || "",
+        user_pincode: summaryData.user_pincode || "",
+        user_landmark: summaryData.user_landmark || "",
+        user_address: summaryData.user_address || [],
+        user_gender: summaryData.user_gender,
+        user_dob: summaryData.user_dob,
+        prefix: summaryData.prefix || "91",
+        // 🔑 THIS IS THE KEY - hardcode these like registration does!
+        roles: ["admin"],     // ← Hardcoded
+        services: [           // ← Hardcoded
+          "Manage Machines 3D",
+          "Maintenance Orders",
+          "Work Instructions",
+          "Procurement",
+          "My Requests",
+          "Services",
+          "Dashboard",
+          "Profile",
+          "Events",
+          "Analytics",
+          "Rewards"
+        ],
+      };
+      
+      sessionStorage.setItem("userDetails", JSON.stringify(sessionUserDetails));
       sessionStorage.setItem("sessionId", sessionId);
- 
+      setUserDetails(sessionUserDetails);
+      
       navigate("/dashboard", { replace: true });
-    } catch {
-      notification.error({
-        message: "Unable to load your profile. Please try again.",
-      });
+    } else {
+      throw new Error("No user summary found");
     }
-  };
- 
+  } catch (error) {
+    console.error("Fetch summary error:", error);
+    notification.error({
+      message: "Unable to load your profile. Please try again.",
+    });
+  }
+};
+
   const formik = useFormik<LoginFormValues>({
     initialValues,
     validationSchema: loginSchema,
@@ -70,20 +110,20 @@ const LoginPage: React.FC = () => {
         });
         return;
       }
- 
+
       const encryptedPassword: string = CryptoJS.AES.encrypt(
         values.user_password,
         SECRET_KEY,
       ).toString();
- 
+
       try {
         const response = await loginAPI({
           user_unique_id: values.user_unique_id,
           user_password: encryptedPassword,
         });
- 
+
         const data: LoginApiResponse | undefined = response?.data;
- 
+
         if (
           response &&
           [200, 201].includes(response.status) &&
@@ -102,7 +142,7 @@ const LoginPage: React.FC = () => {
       }
     },
   });
- 
+
   return (
     <main className="lp-wrapper" aria-labelledby="lp-title">
       <Row justify="center" align="middle" className="lp-row">
@@ -115,11 +155,11 @@ const LoginPage: React.FC = () => {
             >
               Login
             </Typography.Title>
- 
+
             <p className="lp-subtitle">
               Use your account credentials
             </p>
- 
+
             <Form
               layout="vertical"
               onFinish={() => formik.handleSubmit()}
@@ -151,7 +191,7 @@ const LoginPage: React.FC = () => {
                   onBlur={formik.handleBlur}
                 />
               </Form.Item>
- 
+
               <Form.Item
                 label="Password"
                 htmlFor="user_password"
@@ -178,7 +218,7 @@ const LoginPage: React.FC = () => {
                   onBlur={formik.handleBlur}
                 />
               </Form.Item>
- 
+
               <Form.Item>
                 <Checkbox
                   id="remember"
@@ -194,7 +234,7 @@ const LoginPage: React.FC = () => {
                   Remember me
                 </Checkbox>
               </Form.Item>
- 
+
               <Form.Item>
                 <Button
                   type="primary"
@@ -206,16 +246,16 @@ const LoginPage: React.FC = () => {
                   Sign in
                 </Button>
               </Form.Item>
- 
+
               <div className="lp-actions-row">
                 <Button
                   type="link"
                   className="lp-link-btn"
-                  onClick={() => alert("forgot-password")}
+                   onClick={() => navigate("/forgot-password")}
                 >
                   Forgot password?
                 </Button>
- 
+
                 <Button
                   type="link"
                   className="lp-link-btn"
@@ -231,6 +271,5 @@ const LoginPage: React.FC = () => {
     </main>
   );
 };
- 
+
 export default LoginPage;
- 

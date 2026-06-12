@@ -8,6 +8,7 @@ export interface Endpoints {
     SIGN_UP: string;
     GET_SUMMARY: string;
     UPDATE_PROFILE: string;
+     FORGOT_PASSWORD: string; // Add this
 }
 
 let Endpoints: Endpoints;
@@ -24,7 +25,8 @@ if (isDevEnv) {
         GET_SUMMARY: "/stubs/summary.json",
         LOGIN: "/stubs/login.json",
         SIGN_UP: "/stubs/register.json",
-        UPDATE_PROFILE: "/stubs/udateProfile.json",          // ⚠️ Note: you have "udateProfile.json" (typo)
+        UPDATE_PROFILE: "/stubs/udateProfile.json", 
+         FORGOT_PASSWORD: "/stubs/forgotPassword.json", // Add this         // ⚠️ Note: you have "udateProfile.json" (typo)
     };
 } else {
     Endpoints = {
@@ -35,6 +37,7 @@ if (isDevEnv) {
         LOGIN: "/api/login",
         SIGN_UP: "/api/register",
         UPDATE_PROFILE: "/api/update-profile",
+        FORGOT_PASSWORD: "/api/auth/forgot-password"
     };
 }
 

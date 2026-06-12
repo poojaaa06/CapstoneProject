@@ -1,46 +1,14 @@
-
- {
-    "success": true,
-    "userSummary": {
-        "user_unique_id": "uuname1",
-        "user_first_name": "fname1",
-        "user_middle_name": "mname1",
-        "user_last_name": "lname1",
-        "user_email": "asdf@asdf.asdf",
-        "prefix": "+91",
-        "user_phone": "1234567890",
-        "user_dob": "2024-07-24T18:30:00.000Z",
-        "user_gender": "Male",
-        "user_bio": "bio",
-        "user_img": "img",
-        "user_created_date": "2024-08-18T15:20:05.417Z",
-        "user_pincode": "123456",
-        "user_landmark": "landmark",
-        "user_city": "city",
-        "user_state": "state",
-        "user_country": "country",
-        "user_address": "address",
-        "user_last_login": "2024-08-18T15:20:05.417Z",
-        "user_agreement": true,
-        "user_verified": false,
-        "user_selected_org": null,
-        "user_org_limit": null,
-        "user_is_active": true,
-        "roles": [
-            "admin"
-        ],
-        "services": [
-            "Manage Machines 3D",
-            "Maintenance Orders",
-            "Work Instructions",
-            "Procurement",
-            "My Requests",
-            "Services",
-            "Dashboard",
-            "Profile",
-            "Events",
-            "Analytics",
-            "Rewards"
-        ]
-    }
+{
+  "status": 200,
+  "success": true,
+  "userSummary": {
+    "user_unique_id": "testuser",
+    "user_email": "test@example.com",
+    "user_first_name": "Test",
+    "user_last_name": "User",
+    "user_role": "admin",
+    "user_img": "",
+    "user_bio": "",
+    "user_phone": "1234567890"
+  }
 }
