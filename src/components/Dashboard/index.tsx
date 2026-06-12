@@ -175,10 +175,47 @@ const buildBarChartOptions = (data: DepartmentStat[]) => ({
   series: [{ type: 'bar', data: data.map(d => ({ value: d.value, itemStyle: { color: d.color, borderRadius: [0, 4, 4, 0] } })), barMaxWidth: 24, label: { show: true, position: 'right', fontSize: 11 } }],
 });
 
-const buildDonutChartOptions = (data: StatusBreakdown[]) => ({
-  tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
-  legend: { orient: 'vertical', right: 0, top: 'middle', icon: 'circle', itemWidth: 8, itemHeight: 8, textStyle: { fontSize: 11 } },
-  series: [{ type: 'pie', radius: ['48%', '72%'], center: ['38%', '50%'], data: data.map(d => ({ name: d.status, value: d.count, itemStyle: { color: d.color } })), label: { show: false } }],
+const buildDonutChartOptions = (data: StatusBreakdown[], isMobile: boolean = false) => ({
+  tooltip: { 
+    trigger: 'item', 
+    formatter: '{b}: {c} ({d}%)',
+    position: isMobile ? 'top' : undefined,
+  },
+  legend: { 
+    orient: isMobile ? 'horizontal' : 'vertical',
+    left: isMobile ? 'center' : 'right',
+    top: isMobile ? 'bottom' : 'middle',
+    bottom: isMobile ? 0 : undefined,
+    right: isMobile ? undefined : 0,
+    icon: 'circle', 
+    itemWidth: isMobile ? 6 : 8, 
+    itemHeight: isMobile ? 6 : 8,
+    textStyle: { fontSize: isMobile ? 10 : 11 },
+    // For mobile, arrange legend in a row
+    ...(isMobile && {
+      type: 'scroll',
+      pageIconColor: '#666',
+      pageTextStyle: { fontSize: 10 }
+    })
+  },
+  series: [{ 
+    type: 'pie', 
+    radius: isMobile ? ['40%', '65%'] : ['48%', '72%'],
+    center: isMobile ? ['50%', '45%'] : ['38%', '50%'],
+    data: data.map(d => ({ 
+      name: d.status, 
+      value: d.count, 
+      itemStyle: { color: d.color } 
+    })), 
+    label: { 
+      show: false 
+    },
+    // Add these for better mobile display
+    avoidLabelOverlap: true,
+    labelLine: { show: false }
+  }],
+  // Add padding for mobile
+  grid: isMobile ? { containLabel: true, top: 20, bottom: 50 } : undefined,
 });
 
 // Initial state
@@ -325,9 +362,7 @@ const Dashboard: React.FC = () => {
             <Button icon={<ReloadOutlined />} onClick={handleRefresh} size={isMobile ? 'middle' : 'large'}>
               {!isMobile && 'Refresh'}
             </Button>
-            <Button type="primary" icon={<PlusOutlined />} size={isMobile ? 'middle' : 'large'}>
-              {!isMobile && 'New Request'}
-            </Button>
+            
           </Space>
           {isMobile && (
             <Text className="mobile-update-time">Updated {lastRefreshed}</Text>
@@ -377,7 +412,11 @@ const Dashboard: React.FC = () => {
               </Col>
               <Col xs={24} lg={10}>
                 <Card title="Status Breakdown" className="dashboard-card" size={isMobile ? 'small' : 'default'}>
-                  <EChartComponent option={buildDonutChartOptions(dashboardData.statusData || [])} height={isMobile ? 250 : 300} isMobile={isMobile} />
+                 <EChartComponent 
+  option={buildDonutChartOptions(dashboardData.statusData || [], isMobile)} 
+  height={isMobile ? 280 : 300} 
+  isMobile={isMobile} 
+/>
                 </Card>
               </Col>
             </Row>

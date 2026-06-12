@@ -15,8 +15,12 @@ import {
   Col,
   Steps,
   Typography,
+  Upload,
+  Avatar,
   message,
 } from "antd";
+import { UploadOutlined, UserOutlined } from "@ant-design/icons";
+import type { UploadFile, UploadProps } from "antd";
 
 import { registerAPI } from "src/services/registerAPI";
 import { validateUsername } from "src/services/validateUsernameAPI";
@@ -25,12 +29,17 @@ import { validatePhone } from "src/services/validatePhoneAPI";
 import {
   GENDER_OPTIONS,
   COUNTRY_OPTIONS,
-  PHONE_PREFIX_OPTIONS,
 } from "../../stubs/registerStubs";
+import countryCodes from "src/utils/codes.json";
 
 import "./register.css";
 
 const { Title } = Typography;
+
+const PHONE_PREFIX_OPTIONS = countryCodes.map((c) => ({
+  value: c.countryTelephonyCode,
+  label: `${c.shortCountryName} (${c.countryTelephonyCode})`,
+}));
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -151,7 +160,7 @@ const stepSchemas: any[] = [
   // Step 3: profile/address
   Yup.object({
     user_bio: Yup.string().max(200, "Bio cannot exceed 200 characters"),
-    user_img: Yup.string().max(2048, "URL too long"),
+    user_img: Yup.string(),
     user_country: Yup.string().required("Please select your country"),
     user_state: Yup.string().max(200, "State too long"),
     user_city: Yup.string().max(200, "City too long"),
@@ -228,7 +237,7 @@ const RegisterPage: React.FC = () => {
 
   /* ----------------------- submit handler ------------------------- */
 
- const handleSubmit = async (
+  const handleSubmit = async (
   values: RegisterFormValues,
   helpers: FormikHelpers<RegisterFormValues>
 ): Promise<void> => {
@@ -247,6 +256,8 @@ const RegisterPage: React.FC = () => {
 
   setSubmitting(true);
   try {
+    const userImg = values.user_img || "";
+    
     const payload = {
       user_unique_id: values.user_unique_id,
       user_first_name: values.user_first_name,
@@ -259,7 +270,7 @@ const RegisterPage: React.FC = () => {
       user_dob: values.user_dob ? values.user_dob.toISOString() : null,
       user_gender: values.user_gender,
       user_bio: values.user_bio || undefined,
-      user_img: values.user_img || undefined,
+      user_img: userImg,
       user_country: values.user_country,
       user_state: values.user_state || undefined,
       user_city: values.user_city || undefined,
@@ -279,72 +290,96 @@ const RegisterPage: React.FC = () => {
       response?.success === true;
 
     if (ok) {
-  // ========== PREPARE USER DATA ==========
-  const userDataForLocal = {
-    user_unique_id: values.user_unique_id,
-    user_first_name: values.user_first_name,
-    user_middle_name: values.user_middle_name || "",
-    user_last_name: values.user_last_name,
-    user_gender: values.user_gender,
-    user_dob: values.user_dob ? values.user_dob.format("YYYY-MM-DD") : null,
-    user_email: values.user_email,
-    user_phone: values.user_phone,
-    prefix: values.prefix,
-    user_bio: values.user_bio || "",
-    user_img: values.user_img || "",
-    user_country: values.user_country,
-    user_state: values.user_state || "",
-    user_city: values.user_city || "",
-    user_pincode: values.user_pincode || "",
-    user_landmark: values.user_landmark || "",
-    user_address: values.user_address || [],
-    registeredAt: new Date().toISOString(),
-    isLoggedIn: true,
-    user_password: values.user_password,
-  };
+      // ========== SAVE TO LOCALSTORAGE ==========
+      const userData = {
+        // Personal Info
+        user_unique_id: values.user_unique_id,
+        user_first_name: values.user_first_name,
+        user_middle_name: values.user_middle_name || "",
+        user_last_name: values.user_last_name,
+        user_gender: values.user_gender,
+        user_dob: values.user_dob ? values.user_dob.format("YYYY-MM-DD") : null,
+        
+        // Contact Info
+        user_email: values.user_email,
+        user_phone: values.user_phone,
+        prefix: values.prefix,
+        
+        // Profile Info - BOTH fields for compatibility
+        user_bio: values.user_bio || "",
+        user_img: userImg,        // For RegisterPage
+        user_image: userImg,      // For Profile.tsx
+        
+        // Address Info
+        user_country: values.user_country,
+        user_state: values.user_state || "",
+        user_city: values.user_city || "",
+        user_pincode: values.user_pincode || "",
+        user_landmark: values.user_landmark || "",
+        user_address: values.user_address || [],
+        
+        // Meta
+        registeredAt: new Date().toISOString(),
+        isLoggedIn: true
+      };
+      
+      // Save to localStorage
+      localStorage.setItem("userData", JSON.stringify(userData));
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("username", values.user_unique_id);
+      
+      // Also save individual fields for quick access
+      localStorage.setItem("userEmail", values.user_email);
+      localStorage.setItem("userPhone", values.user_phone);
 
-  // Data for sessionStorage (Profile page format)
-  const userDataForSession = {
-    user_unique_id: values.user_unique_id,
-    user_first_name: values.user_first_name,
-    user_middle_name: values.user_middle_name || "",
-    user_last_name: values.user_last_name,
-    user_gender: values.user_gender,
-    user_dob: values.user_dob ? values.user_dob.format("YYYY-MM-DD") : null,
-    user_email: values.user_email,
-    user_phone: values.user_phone,
-    prefix: values.prefix,
-    user_bio: values.user_bio || "",
-    user_image: values.user_img || "",
-    user_country: values.user_country,
-    user_state: values.user_state || "",
-    user_city: values.user_city || "",
-    user_pincode: values.user_pincode || "",
-    user_landmark: values.user_landmark || "",
-    user_address: values.user_address ? values.user_address.join(', ') : "",
-    user_active: true,
-    user_verified: false,
-    user_org_limit: 1,
-    user_role: "user",
-    isLoggedIn: true,
-    user_password: values.user_password,
-  };
+      // Save to sessionStorage - BOTH image fields
+      const sessionUserDetails = {
+        user_unique_id: values.user_unique_id,
+        user_first_name: values.user_first_name,
+        user_middle_name: values.user_middle_name || "",
+        user_last_name: values.user_last_name,
+        user_email: values.user_email,
+        user_phone: values.user_phone,
+        user_img: userImg,         // For backward compatibility
+        user_image: userImg,       // For Profile.tsx
+        user_bio: values.user_bio || "",
+        user_country: values.user_country,
+        user_state: values.user_state || "",
+        user_city: values.user_city || "",
+        user_pincode: values.user_pincode || "",
+        user_landmark: values.user_landmark || "",
+        user_address: values.user_address || [],
+        user_gender: values.user_gender,
+        user_dob: values.user_dob ? values.user_dob.format("YYYY-MM-DD") : null,
+        prefix: values.prefix,
+        roles: ["admin"],
+        services: [
+          "Manage Machines 3D",
+          "Maintenance Orders",
+          "Work Instructions",
+          "Procurement",
+          "My Requests",
+          "Services",
+          "Dashboard",
+          "Profile",
+          "Events",
+          "Analytics",
+          "Rewards"
+        ],
+      };
+      sessionStorage.setItem("userDetails", JSON.stringify(sessionUserDetails));
 
-  // Save to localStorage
-  localStorage.setItem("userData", JSON.stringify(userDataForLocal));
-  localStorage.setItem("isLoggedIn", "true");
-  localStorage.setItem("username", values.user_unique_id);
-  
-  // Save to sessionStorage
-  sessionStorage.setItem("userDetails", JSON.stringify(userDataForSession));
-  sessionStorage.setItem("isLoggedIn", "true");
-  sessionStorage.setItem("username", values.user_unique_id);
-  
-  console.log("✅ Data saved to both storages");
-  
-  message.success("Registration successful! Redirecting...");
-  navigate("/dashboard");
-} else {
+      // Debug: Log what was saved
+      console.log("User data saved to localStorage:", userData);
+      console.log("Session details saved:", sessionUserDetails);
+      
+      // Verify localStorage was set
+      const savedData = localStorage.getItem("userData");
+      console.log("Verification - saved data:", savedData);
+      
+      message.success("Registration successful! Redirecting to your profile...");
+      navigate("/dashboard");
+    } else {
       message.error(response?.message ?? "Registration failed. Try again.");
     }
   } catch (err) {
@@ -367,6 +402,59 @@ const RegisterPage: React.FC = () => {
     []
   );
 
+  /* ----------------------- image upload helper --------------------- */
+  // Reads the selected image file and converts it to a base64 data URL
+  // so it can be stored directly on user_img and rendered immediately
+  // as a preview here and later on the Profile page (Avatar src).
+  const beforeUploadImage = (file: File): boolean => {
+    const isImage = file.type.startsWith("image/");
+    if (!isImage) {
+      message.error("Please upload an image file.");
+      return false;
+    }
+    const isUnder2MB = file.size / 1024 / 1024 < 2;
+    if (!isUnder2MB) {
+      message.error("Image must be smaller than 2MB.");
+      return false;
+    }
+    return true;
+  };
+
+  const getCompressedBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 200;
+          const MAX_HEIGHT = 200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/jpeg", 0.7));
+        };
+        img.onerror = (err) => reject(err);
+      };
+      reader.onerror = (err) => reject(err);
+    });
   return (
     <main className="register-page" aria-labelledby="register-heading">
       <Card
@@ -410,7 +498,7 @@ const RegisterPage: React.FC = () => {
               extra?: string | null
             ): "" | "error" =>
               (touched[name] && (errors as Record<string, string>)[name]) ||
-              extra
+                extra
                 ? "error"
                 : "";
 
@@ -422,6 +510,24 @@ const RegisterPage: React.FC = () => {
               if (touched[name] && e) return e;
               if (extra) return extra;
               return undefined;
+            };
+
+            const uploadProps: UploadProps = {
+              accept: "image/*",
+              maxCount: 1,
+              showUploadList: false,
+              beforeUpload: beforeUploadImage,
+              customRequest: async ({ file, onSuccess, onError }) => {
+                try {
+                  const base64 = await getCompressedBase64(file as File);
+                  setFieldValue("user_img", base64);
+                  setFieldTouched("user_img", true);
+                  onSuccess?.("ok");
+                } catch (err) {
+                  onError?.(err as Error);
+                  message.error("Failed to read image. Please try again.");
+                }
+              },
             };
 
             return (
@@ -689,19 +795,33 @@ const RegisterPage: React.FC = () => {
                       </Form.Item>
                     </Col>
 
-                    <Col xs={24} sm={12}>
+                    <Col xs={24}>
                       <Form.Item
-                        label="Image URL"
+                        label="Profile photo"
                         validateStatus={fieldStatus("user_img")}
                         help={fieldHelp("user_img")}
                       >
-                        <Input
-                          id="user_img"
-                          name="user_img"
-                          value={values.user_img}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                        />
+                        <div className="register-avatar-upload">
+                          <Avatar
+                            size={64}
+                            src={values.user_img || undefined}
+                            icon={!values.user_img ? <UserOutlined /> : undefined}
+                          />
+                          <Upload {...uploadProps}>
+                            <Button icon={<UploadOutlined />}>
+                              {values.user_img ? "Change photo" : "Upload photo"}
+                            </Button>
+                          </Upload>
+                          {values.user_img && (
+                            <Button
+                              type="text"
+                              danger
+                              onClick={() => setFieldValue("user_img", "")}
+                            >
+                              Remove
+                            </Button>
+                          )}
+                        </div>
                       </Form.Item>
                     </Col>
 
@@ -850,7 +970,7 @@ const RegisterPage: React.FC = () => {
                 {/* ---------------- Actions ---------------- */}
                 <div className="register-actions" role="group" aria-label="Form navigation">
                   <Button
-                    onClick={() => navigate("/login")}
+                    onClick={() => navigate("/")}
                     type="link"
                     aria-label="Go to login"
                   >

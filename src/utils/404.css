@@ -1,0 +1,319 @@
+/* 404.css */
+
+.nf-wrapper {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 24px 64px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  background-image: url('../../public/images/404.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-attachment: scroll;
+}
+
+/* Mobile & Tablet — position heading top, 404 centered, content bottom */
+@media (max-width: 1023px) {
+  .nf-wrapper {
+    background-image: url('../../public/images/404mobile.png');
+    align-items: center;
+    justify-content: space-between;
+    padding: 40px 20px 20px 20px;
+    background-position: center 60%;
+    background-size: 85%;
+    background-repeat: no-repeat;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+}
+
+/* Hide the DOM img on all sizes — not needed anymore */
+.nf-mobile-image {
+  display: none;
+}
+
+/* ============================================
+   DESKTOP breakpoints
+   ============================================ */
+@media (min-width: 1024px) and (max-width: 1366px) {
+  .nf-wrapper {
+    padding: 40px 60px;
+    background-image: url('../../public/images/404.png');
+  }
+  .nf-card { max-width: 540px; }
+  .nf-title { font-size: 60px; }
+}
+
+@media (min-width: 1367px) {
+  .nf-wrapper {
+    padding: 48px 80px;
+    background-image: url('../../public/images/404.png');
+  }
+  .nf-card { max-width: 640px; }
+  .nf-title { font-size: 72px; }
+  .nf-subtitle { font-size: 20px; max-width: 520px; }
+  .nf-actions .ant-btn { height: 48px; padding: 0 32px; font-size: 16px; }
+}
+
+@media (min-width: 1920px) {
+  .nf-wrapper { padding: 64px 120px; }
+  .nf-card { max-width: 720px; }
+  .nf-title { font-size: 84px; }
+  .nf-subtitle { font-size: 22px; max-width: 580px; }
+}
+
+/* ============================================
+   CARD & TEXT
+   ============================================ */
+.nf-card {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 560px;
+  box-shadow: none;
+  text-align: left;
+  position: relative;
+  z-index: 2;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Mobile card layout: split into header and footer sections */
+@media (max-width: 1023px) {
+  .nf-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    max-width: 100%;
+    height: 100%;
+  }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.nf-title,
+.nf-subtitle {
+  margin: 0;
+  text-align: left;
+}
+
+@media (max-width: 1023px) {
+  .nf-title,
+  .nf-subtitle {
+    text-align: center;
+  }
+}
+
+.nf-title {
+  font-size: 64px;
+  font-weight: 600;
+  color: #545050;
+  position: relative;
+  padding-bottom: 18px;
+  margin-bottom: 20px;
+  word-break: break-word;
+}
+
+@media (max-width: 1023px) {
+  .nf-title {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 640px) {
+  .nf-title {
+    font-size: 28px;
+  }
+}
+
+.nf-title-accent {
+  color: #7ed321;
+  font-weight: 700;
+}
+
+.nf-title::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 60px;
+  height: 4px;
+  background: #7ed321;
+  border-radius: 2px;
+}
+
+@media (max-width: 1023px) {
+  .nf-title::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 640px) {
+  .nf-title::after {
+    width: 45px;
+    height: 3px;
+  }
+}
+
+.nf-subtitle {
+  font-size: 18px;
+  line-height: 1.6;
+  color: #545050;
+  max-width: 460px;
+  margin-top: 8px;
+}
+
+@media (max-width: 1023px) {
+  .nf-subtitle {
+    font-size: 14px;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .nf-subtitle {
+    font-size: 13px;
+  }
+}
+
+.nf-card .ant-result {
+  text-align: left;
+  padding: 0;
+  background: transparent;
+}
+
+.nf-card .ant-result-icon { display: none; }
+.nf-card .ant-result-title { text-align: left; color: #545050; padding: 0; }
+.nf-card .ant-result-subtitle { text-align: left; color: #545050; }
+.nf-card .ant-result-extra { margin-top: 32px; }
+
+.nf-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 1023px) {
+  .nf-actions {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .nf-actions {
+    gap: 12px;
+  }
+}
+
+.nf-actions .ant-btn .anticon { display: none; }
+
+.nf-actions .ant-btn {
+  height: 44px;
+  padding: 0 28px;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .nf-actions .ant-btn {
+    height: 40px;
+    padding: 0 20px;
+    font-size: 14px;
+  }
+}
+
+.nf-actions .ant-btn-primary {
+  background: #7ed321;
+  border-color: #7ed321;
+  color: #0a0c0a;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.nf-actions .ant-btn-primary:hover,
+.nf-actions .ant-btn-primary:focus {
+  background: #8fe233;
+  border-color: #8fe233;
+  color: #0a0c0a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(126, 211, 33, 0.3);
+}
+
+.nf-actions .ant-btn-default {
+  background: transparent;
+  border: 1px solid rgba(84, 80, 80, 0.4);
+  color: #545050;
+  font-weight: 500;
+  border-radius: 8px;
+}
+
+.nf-actions .ant-btn-default:hover,
+.nf-actions .ant-btn-default:focus {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(84, 80, 80, 0.7);
+  color: #545050;
+  transform: translateY(-2px);
+}
+
+.nf-hint {
+  margin-top: 24px;
+  color: #6b706b;
+  font-size: 15px;
+  text-align: left;
+  padding: 12px 0;
+}
+
+@media (max-width: 1023px) {
+  .nf-hint {
+    font-size: 13px;
+    margin-top: 16px;
+    text-align: center;
+    width: 100%;
+  }
+}
+
+.nf-hint strong {
+  color: #7ed321;
+  font-weight: 600;
+}
+
+.nf-card :focus-visible {
+  outline: 3px solid #7ed321;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nf-card { animation: none; }
+  .nf-actions .ant-btn { transition: none; }
+  .nf-actions .ant-btn:hover,
+  .nf-actions .ant-btn:focus { transform: none; }
+}
+
+@media print {
+  .nf-wrapper {
+    background-image: none !important;
+    background-color: white;
+    min-height: auto;
+    padding: 20px;
+  }
+  .nf-title { color: #000; }
+  .nf-subtitle { color: #666; }
+  .nf-actions .ant-btn { border: 1px solid #ccc; background: transparent; }
+}

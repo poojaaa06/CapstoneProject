@@ -1,39 +1,33 @@
-// src/api/axiosInstance.ts
-import axios from 'axios';
-import type { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
+
+const BASE_URL: string = process.env.REACT_APP_API_BASE_URL ?? "http://localhost:3000";
 
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL || '/api',
-  timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: BASE_URL,
+  timeout: 15000,
+  headers: { "Content-Type": "application/json" },
 });
 
-// Request interceptor
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('accessToken');
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const sessionId = sessionStorage.getItem("sessionId");
+    if (sessionId && config.headers) {
+      config.headers.Authorization = `Bearer ${sessionId}`;
     }
     return config;
   },
-  (error: AxiosError) => {
-    return Promise.reject(error);
-  }
+  (error: AxiosError) => Promise.reject(error),
 );
 
-// Response interceptor
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('accessToken');
-      window.location.href = '/login';
+      sessionStorage.clear();
+      window.location.assign("/login");
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default axiosInstance;

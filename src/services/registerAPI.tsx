@@ -1,4 +1,4 @@
-import { apiClient } from "src/api/apiClient";
+import axiosInstance from "src/api/axiosInstance";
 import Endpoints from "src/api/endpoints";
 
 type FormFields = {
@@ -25,16 +25,19 @@ type FormFields = {
 
 export const registerAPI = async (formData: FormFields) => {
     try {
-        // For development - you can use a mock response
-        // const response = await apiClient("post", Endpoints.SIGN_UP, formData);
-        // return response.data;
+        // Check if we're in development (using stubs)
+        const isDevEnv = true; // Or use your actual env check
         
-        // Mock response for testing
-        return {
-            status: 201,
-            success: true,
-            message: "Registration successful"
-        };
+        let response;
+        if (isDevEnv) {
+            // Use GET for stub files (POST doesn't work with static JSON)
+            response = await axiosInstance.get(Endpoints.SIGN_UP);
+        } else {
+            // Production - use POST
+            response = await axiosInstance.post(Endpoints.SIGN_UP, formData);
+        }
+        
+        return response.data;
     } catch (error) {
         console.error("Registration error:", error);
         throw error;

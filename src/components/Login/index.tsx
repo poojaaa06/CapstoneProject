@@ -1,153 +1,233 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppContext } from "src/context/appContext";
-import type { FormProps } from "antd";
-import { Checkbox, Form, Input } from "antd";
+import { useFormik } from "formik";
 import CryptoJS from "crypto-js";
-import CustomCard from "src/asserts/UI_components/Card/card.styled";
-import { StyledLoginPage } from "./login.styled";
-import StyledButton from "src/asserts/UI_components/ButtonComponent/button.styled";
-import { ToastMessage } from "src/asserts/UI_components/ToastMessage.tsx/toastMessage.styled";
+import {
+  Card,
+  Form,
+  Input,
+  Checkbox,
+  Button,
+  Row,
+  Col,
+  Typography,
+  notification,
+} from "antd";
+import { LockOutlined, UserOutlined } from "@ant-design/icons";
+
+import { useAppContext } from "src/context/appContext";
+import { loginSchema } from "src/validations/loginSchema";
 import { loginAPI } from "src/services/loginApi";
 import { getSummaryAPI } from "src/services/summaryAPi";
+import {
+  LoginFormValues,
+  LoginApiResponse,
+  SummaryApiResponse,
+} from "src/types/auth.type";
 
-const SECRET_KEY = "CagHKozTTJqLffF8KJChNp4926AQ8pRe"; //TODO: DO secret key needs to move to .env?
+import "./login.css";
 
-type FieldType = {
-  user_unique_id?: string;
-  user_password?: string;
-  remember?: string;
+const SECRET_KEY: string = process.env.REACT_APP_SECRET_KEY ?? "";
+
+const initialValues: LoginFormValues = {
+  user_unique_id: "",
+  user_password: "",
+  remember: true,
 };
-type sessionId = string;
 
-export default function LoginPage() {
+const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { setUserDetails } = useAppContext();
-  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-    const user_unique_id = values?.user_unique_id ? values.user_unique_id : "";
-    const user_password = values?.user_password ? values.user_password : "";
 
-    const encryptedPassword = CryptoJS.AES.encrypt(
-      user_password,
-      SECRET_KEY
-    ).toString();
-
-    const formData = {
-      user_unique_id,
-      user_password: encryptedPassword,
-    };
-
+  const fetchSummary = async (sessionId: string): Promise<void> => {
     try {
-      const response = await loginAPI(formData);
-      const sessionId = response?.data.sessionId;
-      if ((response && response?.status === 200) || response?.status === 201) {
-        getSummary(sessionId);
-      } else {
-        ToastMessage.error("Please add valid credentials", 3);
-      }
-    } catch (err) {
-      ToastMessage.error("Something went wrong please try again", 3);
+      const summary: SummaryApiResponse = await getSummaryAPI(sessionId);
+
+      setUserDetails(summary.userSummary);
+
+      sessionStorage.setItem(
+        "userDetails",
+        JSON.stringify(summary.userSummary),
+      );
+
+      sessionStorage.setItem("sessionId", sessionId);
+
+      navigate("/dashboard", { replace: true });
+    } catch {
+      notification.error({
+        message: "Unable to load your profile. Please try again.",
+      });
     }
   };
 
-  const getSummary = async (sessionId: sessionId) => {
-    try {
-      const summaryResponse = await getSummaryAPI(sessionId);
-      if (summaryResponse) {
-        //TODO: If response is success
-        setUserDetails(summaryResponse.userSummary);
-        sessionStorage.setItem(
-          "userDetails",
-          JSON.stringify(summaryResponse.userSummary)
-        );
-        console.log("res data", summaryResponse.userSummary);
-        navigate("assets");
-      } else {
-        ToastMessage.error("Something went wrong please try again", 3);
+  const formik = useFormik<LoginFormValues>({
+    initialValues,
+    validationSchema: loginSchema,
+    onSubmit: async (values) => {
+      if (!SECRET_KEY) {
+        notification.error({
+          message: "Configuration error. Contact support.",
+        });
+        return;
       }
-    } catch (error) {
-      ToastMessage.error("Something went wrong please try again", 3);
-    }
-  };
 
-  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
-    errorInfo
-  ) => {
-    console.log("Failed:", errorInfo);
-  };
+      const encryptedPassword: string = CryptoJS.AES.encrypt(
+        values.user_password,
+        SECRET_KEY,
+      ).toString();
 
-  const actions: React.ReactNode[] = [
-    <StyledButton onClick={() => alert("--------")}>
-      Forget Password
-    </StyledButton>,
-    <StyledButton
-      onClick={() => {
-        navigate("/register");
-      }}
-    >
-      Register
-    </StyledButton>,
-  ];
+      try {
+        const response = await loginAPI({
+          user_unique_id: values.user_unique_id,
+          user_password: encryptedPassword,
+        });
+
+        const data: LoginApiResponse | undefined = response?.data;
+
+        if (
+          response &&
+          [200, 201].includes(response.status) &&
+          data?.sessionId
+        ) {
+          await fetchSummary(data.sessionId);
+        } else {
+          notification.error({
+            message: "Invalid credentials.",
+          });
+        }
+      } catch {
+        notification.error({
+          message: "Something went wrong. Please try again.",
+        });
+      }
+    },
+  });
 
   return (
-    <StyledLoginPage>
-      <CustomCard title="Login" width={"300px"} actions={actions}>
-        <Form
-          name="basic"
-          labelCol={{ span: 24 }}
-          wrapperCol={{ span: 24 }}
-          style={{ maxWidth: 600 }}
-          initialValues={{ remember: true }}
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
-          autoComplete="off"
-        >
-          <Form.Item<FieldType>
-            label="Username"
-            name="user_unique_id"
-            rules={[
-              {
-                required: true,
-                message: "Please enter a valid username!",
-              },
-            ]}
-          >
-            <Input />
-          </Form.Item>
+    <main className="lp-wrapper" aria-labelledby="lp-title">
+      <Row justify="center" align="middle" className="lp-row">
+        <Col xs={24} sm={20} md={14} lg={10} xl={8}>
+          <Card className="lp-card" variant="outlined">
+            <Typography.Title
+              level={1}
+              id="lp-title"
+              className="lp-title"
+            >
+              Login
+            </Typography.Title>
 
-          <Form.Item<FieldType>
-            label="Password"
-            name="user_password"
-            rules={[
-              {
-                required: true,
-                message: "Please enter a valid username!",
-              },
-              {
-                pattern: /^(?=.*[A-Z])(?=.*[!@#$%^&*])/,
-                message:
-                  "Password must contain at least one uppercase letter and one special character!",
-              },
-            ]}
-          >
-            <Input.Password />
-          </Form.Item>
+            <p className="lp-subtitle">
+              Use your account credentials
+            </p>
 
-          <Form.Item<FieldType>
-            name="remember"
-            valuePropName="checked"
-            wrapperCol={{ offset: 0, span: 16 }}
-          >
-            <Checkbox>Remember me</Checkbox>
-          </Form.Item>
+            <Form
+              layout="vertical"
+              onFinish={() => formik.handleSubmit()}
+              noValidate
+            >
+              <Form.Item
+                label="Username"
+                htmlFor="user_unique_id"
+                validateStatus={
+                  formik.touched.user_unique_id &&
+                  formik.errors.user_unique_id
+                    ? "error"
+                    : ""
+                }
+                help={
+                  formik.touched.user_unique_id &&
+                  formik.errors.user_unique_id
+                }
+              >
+                <Input
+                  id="user_unique_id"
+                  name="user_unique_id"
+                  prefix={<UserOutlined aria-hidden />}
+                  autoComplete="username"
+                  aria-label="Username"
+                  aria-required="true"
+                  value={formik.values.user_unique_id}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+              </Form.Item>
 
-          <Form.Item wrapperCol={{ offset: 4, span: 16 }}>
-            <StyledButton type="primary" htmlType="submit">
-              Submit
-            </StyledButton>
-          </Form.Item>
-        </Form>
-      </CustomCard>
-    </StyledLoginPage>
+              <Form.Item
+                label="Password"
+                htmlFor="user_password"
+                validateStatus={
+                  formik.touched.user_password &&
+                  formik.errors.user_password
+                    ? "error"
+                    : ""
+                }
+                help={
+                  formik.touched.user_password &&
+                  formik.errors.user_password
+                }
+              >
+                <Input.Password
+                  id="user_password"
+                  name="user_password"
+                  prefix={<LockOutlined aria-hidden />}
+                  autoComplete="current-password"
+                  aria-label="Password"
+                  aria-required="true"
+                  value={formik.values.user_password}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+              </Form.Item>
+
+              <Form.Item>
+                <Checkbox
+                  id="remember"
+                  name="remember"
+                  checked={formik.values.remember}
+                  onChange={(e) =>
+                    formik.setFieldValue(
+                      "remember",
+                      e.target.checked,
+                    )
+                  }
+                >
+                  Remember me
+                </Checkbox>
+              </Form.Item>
+
+              <Form.Item>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  className="lp-submit"
+                  loading={formik.isSubmitting}
+                  aria-label="Sign in to your account"
+                >
+                  Sign in
+                </Button>
+              </Form.Item>
+
+              <div className="lp-actions-row">
+                <Button
+                  type="link"
+                  className="lp-link-btn"
+                  onClick={() => alert("forgot-password")}
+                >
+                  Forgot password?
+                </Button>
+
+                <Button
+                  type="link"
+                  className="lp-link-btn"
+                  onClick={() => navigate("/register")}
+                >
+                  Register
+                </Button>
+              </div>
+            </Form>
+          </Card>
+        </Col>
+      </Row>
+    </main>
   );
 }

@@ -3,30 +3,30 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from 'src/context/appContext';
 import {
-  App,
-  Row,
-  Col,
-  Space,
-  Typography,
-  notification,
-  Divider,
-  Select,
-  Card,
-  Avatar,
-  Upload,
-  Button,
-  DatePicker,
-  Dropdown,
-  MenuProps,
-  Form as AntForm,
+App,
+Row,
+Col,
+Space,
+Typography,
+notification,
+Divider,
+Select,
+Card,
+Avatar,
+Upload,
+Button,
+DatePicker,
+Dropdown,
+MenuProps,
+Form as AntForm,
 } from 'antd';
 import {
-  EditOutlined,
-  SaveOutlined,
-  CloseOutlined,
-  UploadOutlined,
-  UserOutlined,
-  DeleteOutlined,
+EditOutlined,
+SaveOutlined,
+CloseOutlined,
+UploadOutlined,
+UserOutlined,
+DeleteOutlined,
 } from '@ant-design/icons';
 import { updateProfileAPI } from 'src/services/updateProfileAPI';
 import { Formik, Form } from 'formik';
@@ -932,3 +932,4 @@ export const Profile: React.FC = () => {
   );
 };
 export default Profile;
+ 
