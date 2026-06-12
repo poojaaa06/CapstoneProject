@@ -230,6 +230,4 @@ const LoginPage: React.FC = () => {
       </Row>
     </main>
   );
-};
-
-export default LoginPage;
+}
