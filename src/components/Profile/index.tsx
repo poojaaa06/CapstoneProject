@@ -1,4 +1,4 @@
-import "./Profile.css";
+import './Profile.css';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from 'src/context/appContext';
@@ -33,40 +33,51 @@ import { Formik, Form } from 'formik';
 import { profileValidationSchema } from './profileValidation';
 import dayjs from 'dayjs';
 import countryCodes from 'src/utils/codes.json';
-
 const { Text } = Typography;
 const { Option } = Select;
-
 export const Profile: React.FC = () => {
   const { userDetails, setUserDetails } = useAppContext();
   const [isEditable, setIsEditable] = useState(false);
-  // null  → no photo at all (blank avatar)
-  // ""    → not yet loaded
+  // null → no photo at all (blank avatar)
+  // "" → not yet loaded
   // "data:..." → actual image
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [api, contextHolder] = notification.useNotification();
   const navigate = useNavigate();
-  const { modal }= App.useApp();
+  const { modal } = App.useApp();
   // Seed profileImage once when userDetails first arrives
   useEffect(() => {
     if (!profileImage && userDetails) {
       setProfileImage(userDetails.user_image || null);
     }
   }, [userDetails]);
-
   // ── Image upload ────────────────────────────────────────────────────────────
   const handleImageUpload = (info: any) => {
     console.log('Upload info:', info);
-
     const file = info.file?.originFileObj || info.file;
-
     if (!(file instanceof File)) {
       console.log('No valid file found');
       return;
     }
-
+    // Allowed image types
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      notification.error({
+        message: 'Invalid File Type',
+        description: 'Only JPG, JPEG, PNG, and WEBP image files are allowed.',
+      });
+      return;
+    }
+    // Maximum size: 2 MB
+    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+    if (file.size > maxSize) {
+      notification.error({
+        message: 'File Too Large',
+        description: 'Image size must not exceed 2 MB.',
+      });
+      return;
+    }
     const reader = new FileReader();
-
     reader.onload = (e) => {
       const result = e.target?.result;
       console.log('FileReader result:', result);
@@ -74,18 +85,18 @@ export const Profile: React.FC = () => {
         setProfileImage(result);
       }
     };
-
     reader.onerror = (err) => {
       console.error('FileReader error:', err);
+      notification.error({
+        message: 'Upload Failed',
+        description: 'Unable to read the selected image.',
+      });
     };
-
     reader.readAsDataURL(file);
   };
-
   const handleRemovePhoto = () => {
     setProfileImage(null);
   };
-
   const handleDeleteAccount = () => {
     modal.confirm({
       title: 'Delete Account',
@@ -96,25 +107,21 @@ export const Profile: React.FC = () => {
       cancelText: 'Cancel',
       onOk: () => {
         sessionStorage.removeItem('userDetails');
-
         if (setUserDetails) {
           setUserDetails(null);
         }
-
         api.success({
           message: 'Account Deleted',
           description: 'Your account has been deleted successfully.',
           placement: 'topRight',
           duration: 3,
         });
-
         setTimeout(() => {
           navigate('/');
         }, 1500);
       },
     });
   };
-
   // ── Form submit ─────────────────────────────────────────────────────────────
   const handleFormSubmit = async (
     values: any,
@@ -127,39 +134,29 @@ export const Profile: React.FC = () => {
     },
   ) => {
     console.log('FORM SUBMITTED', values);
-
     try {
       const payload = {
         ...values,
         user_image: profileImage || '',
       };
-
       console.log('Payload:', payload);
-
       const response = await updateProfileAPI(payload);
       console.log('API SUCCESS:', response);
-
       const updatedUser = { ...userDetails, ...payload };
-
       if (setUserDetails) {
         setUserDetails(updatedUser);
       }
-
       sessionStorage.setItem('userDetails', JSON.stringify(updatedUser));
-
       api.success({
         message: 'Profile Updated',
         description: 'Your profile has been updated successfully.',
         placement: 'topRight',
         duration: 3,
       });
-
       setIsEditable(false);
-
       resetForm({ values: updatedUser });
     } catch (error: any) {
       console.error('PROFILE UPDATE ERROR:', error);
-
       api.error({
         message: 'Update Failed',
         description:
@@ -173,27 +170,23 @@ export const Profile: React.FC = () => {
       setSubmitting(false);
     }
   };
-
   const colLayout = isEditable
     ? { xs: 24, sm: 12, lg: 8 }
     : { xs: 24, sm: 12, lg: 6 };
-
   // ── Render ───────────────────────────────────────────────────────────────────
-
   return (
     <>
       {contextHolder}
       <Formik
         enableReinitialize
         initialValues={{
+          user_bio: userDetails?.user_bio || '',
           user_unique_id: userDetails?.user_unique_id || '',
           user_first_name: userDetails?.user_first_name || '',
           user_middle_name: userDetails?.user_middle_name || '',
           user_last_name: userDetails?.user_last_name || '',
           user_email: userDetails?.user_email || '',
-
           prefix: userDetails?.prefix || '+91',
-
           user_phone: userDetails?.user_phone || '',
           user_gender: userDetails?.user_gender || '',
           user_dob: userDetails?.user_dob
@@ -225,15 +218,38 @@ export const Profile: React.FC = () => {
             resetForm();
             setProfileImage(userDetails?.user_image || null);
           };
-
           const photoMenuItems: MenuProps['items'] = profileImage
             ? [
                 {
                   key: 'change',
                   label: (
                     <Upload
+                      accept=".jpg,.jpeg,.png,.webp"
                       showUploadList={false}
-                      beforeUpload={() => false}
+                      beforeUpload={(file) => {
+                        const allowedTypes = [
+                          'image/jpeg',
+                          'image/jpg',
+                          'image/png',
+                          'image/webp',
+                        ];
+                        if (!allowedTypes.includes(file.type)) {
+                          notification.error({
+                            message: 'Invalid File Type',
+                            description:
+                              'Only JPG, JPEG, PNG, and WEBP image files are allowed.',
+                          });
+                          return Upload.LIST_IGNORE;
+                        }
+                        if (file.size > 2 * 1024 * 1024) {
+                          notification.error({
+                            message: 'File Too Large',
+                            description: 'Image size must not exceed 2 MB.',
+                          });
+                          return Upload.LIST_IGNORE;
+                        }
+                        return false;
+                      }}
                       onChange={handleImageUpload}
                     >
                       <span>
@@ -255,8 +271,32 @@ export const Profile: React.FC = () => {
                   key: 'upload',
                   label: (
                     <Upload
+                      accept=".jpg,.jpeg,.png,.webp"
                       showUploadList={false}
-                      beforeUpload={() => false}
+                      beforeUpload={(file) => {
+                        const allowedTypes = [
+                          'image/jpeg',
+                          'image/jpg',
+                          'image/png',
+                          'image/webp',
+                        ];
+                        if (!allowedTypes.includes(file.type)) {
+                          notification.error({
+                            message: 'Invalid File Type',
+                            description:
+                              'Only JPG, JPEG, PNG, and WEBP image files are allowed.',
+                          });
+                          return Upload.LIST_IGNORE;
+                        }
+                        if (file.size > 2 * 1024 * 1024) {
+                          notification.error({
+                            message: 'File Too Large',
+                            description: 'Image size must not exceed 2 MB.',
+                          });
+                          return Upload.LIST_IGNORE;
+                        }
+                        return false; // prevent auto upload
+                      }}
                       onChange={handleImageUpload}
                     >
                       <span>
@@ -266,7 +306,6 @@ export const Profile: React.FC = () => {
                   ),
                 },
               ];
-
           return (
             <div className="profile-container">
               {/* ── Page Header ────────────────────────────────────────────── */}
@@ -289,7 +328,6 @@ export const Profile: React.FC = () => {
                         >
                           Edit
                         </Button>
-
                         <Button
                           danger
                           icon={<DeleteOutlined />}
@@ -299,7 +337,6 @@ export const Profile: React.FC = () => {
                         </Button>
                       </>
                     )}
-
                     {isEditable && (
                       <>
                         <Button
@@ -311,7 +348,6 @@ export const Profile: React.FC = () => {
                         >
                           Save
                         </Button>
-
                         <Button
                           danger
                           icon={<CloseOutlined />}
@@ -324,13 +360,13 @@ export const Profile: React.FC = () => {
                   </Space>
                 </Col>
               </Row>
-
               {/* ── Profile Header Card ─────────────────────────────────────── */}
               <Card className="profile-header-card">
                 <div className="profile-header">
                   <div className="avatar-wrapper">
                     <Avatar
-                      size={120}
+                      className="profile-avatar"
+                      size={180}
                       src={profileImage || undefined}
                       icon={!profileImage ? <UserOutlined /> : undefined}
                     />
@@ -342,20 +378,35 @@ export const Profile: React.FC = () => {
                         <Button
                           shape="circle"
                           icon={<EditOutlined />}
-                          className="camera-btn"
+                          className="edit-btn"
                         />
                       </Dropdown>
                     )}
                   </div>
-
                   <h2 className="profile-name">
                     {userDetails?.user_first_name} {userDetails?.user_last_name}
                   </h2>
-
                   <p className="profile-email">{userDetails?.user_email}</p>
+                  {/* ── Bio Section ───────────────────────────────────── */}
+                  <div className="profile-bio">
+                    {isEditable ? (
+                      <textarea
+                        name="user_bio"
+                        value={values.user_bio || ''}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        className="bio-textarea"
+                        placeholder="Tell us about yourself..."
+                        rows={4}
+                      />
+                    ) : (
+                      <p>
+                        <i>{userDetails?.user_bio || ''}</i>
+                      </p>
+                    )}
+                  </div>
                 </div>
               </Card>
-
               {/* ── Form Card ───────────────────────────────────────────────── */}
               <Card className="profile-details-card">
                 <Form id="profile-form">
@@ -373,7 +424,6 @@ export const Profile: React.FC = () => {
                         <Text>{userDetails?.user_unique_id}</Text>
                       </AntForm.Item>
                     </Col>
-
                     {/* First Name */}
                     <Col {...colLayout}>
                       <AntForm.Item
@@ -414,7 +464,6 @@ export const Profile: React.FC = () => {
                         )}
                       </AntForm.Item>
                     </Col>
-
                     {/* Middle Name */}
                     <Col {...colLayout}>
                       <AntForm.Item
@@ -436,7 +485,6 @@ export const Profile: React.FC = () => {
                         )}
                       </AntForm.Item>
                     </Col>
-
                     {/* Last Name */}
                     <Col {...colLayout}>
                       <AntForm.Item
@@ -477,7 +525,6 @@ export const Profile: React.FC = () => {
                         )}
                       </AntForm.Item>
                     </Col>
-
                     {/* Gender */}
                     <Col {...colLayout}>
                       <AntForm.Item
@@ -527,7 +574,6 @@ export const Profile: React.FC = () => {
                         )}
                       </AntForm.Item>
                     </Col>
-
                     {/* Date of Birth */}
                     <Col {...colLayout}>
                       <AntForm.Item
@@ -581,7 +627,6 @@ export const Profile: React.FC = () => {
                       </AntForm.Item>
                     </Col>
                   </Row>
-
                   {/* Contact Information */}
                   <Divider orientation="left">Contact Information</Divider>
                   <Row gutter={[16, 16]}>
@@ -626,7 +671,6 @@ export const Profile: React.FC = () => {
                         )}
                       </AntForm.Item>
                     </Col>
-
                     {/* Phone */}
                     <Col {...colLayout}>
                       <AntForm.Item
@@ -663,24 +707,13 @@ export const Profile: React.FC = () => {
                               onChange={(value) =>
                                 setFieldValue('prefix', value)
                               }
-                              optionFilterProp="children"
-                              filterOption={(input, option) =>
-                                String(option?.children)
-                                  .toLowerCase()
-                                  .includes(input.toLowerCase())
-                              }
-                            >
-                              {countryCodes.map((country) => (
-                                <Select.Option
-                                  key={`${country.locale}-${country.countryTelephonyCode}`}
-                                  value={country.countryTelephonyCode}
-                                >
-                                  {country.fullCountryName} (
-                                  {country.countryTelephonyCode})
-                                </Select.Option>
-                              ))}
-                            </Select>
-
+                              optionFilterProp="label"
+                              options={countryCodes.map((country) => ({
+                                value: country.countryTelephonyCode,
+                                label: `${country.fullCountryName} (${country.countryTelephonyCode})`,
+                              }))}
+                              optionLabelProp="value"
+                            />
                             <input
                               className="ant-input addon-input"
                               name="user_phone"
@@ -698,7 +731,6 @@ export const Profile: React.FC = () => {
                       </AntForm.Item>
                     </Col>
                   </Row>
-
                   {/* Address Information */}
                   <Divider orientation="left">Address Information</Divider>
                   <Row gutter={[16, 16]}>
@@ -736,7 +768,6 @@ export const Profile: React.FC = () => {
                         )}
                       </AntForm.Item>
                     </Col>
-
                     {/* Landmark */}
                     <Col {...colLayout}>
                       <AntForm.Item
@@ -758,7 +789,6 @@ export const Profile: React.FC = () => {
                         )}
                       </AntForm.Item>
                     </Col>
-
                     {/* Pincode */}
                     <Col {...colLayout}>
                       <AntForm.Item
@@ -792,7 +822,6 @@ export const Profile: React.FC = () => {
                         )}
                       </AntForm.Item>
                     </Col>
-
                     {/* City */}
                     <Col {...colLayout}>
                       <AntForm.Item
@@ -826,7 +855,6 @@ export const Profile: React.FC = () => {
                         )}
                       </AntForm.Item>
                     </Col>
-
                     {/* State */}
                     <Col {...colLayout}>
                       <AntForm.Item
@@ -860,7 +888,6 @@ export const Profile: React.FC = () => {
                         )}
                       </AntForm.Item>
                     </Col>
-
                     {/* Country */}
                     <Col {...colLayout}>
                       <AntForm.Item
@@ -904,5 +931,4 @@ export const Profile: React.FC = () => {
     </>
   );
 };
-
 export default Profile;
