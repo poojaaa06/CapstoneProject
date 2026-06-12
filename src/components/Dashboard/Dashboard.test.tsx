@@ -1,7 +1,7 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import Dashboard from './index';
-
+ 
 jest.mock('antd', () => ({
   Row: ({ children }: any) => <div>{children}</div>,
   Col: ({ children }: any) => <div>{children}</div>,
@@ -19,7 +19,7 @@ jest.mock('antd', () => ({
   Drawer: ({ children }: any) => <div>{children}</div>,
   Segmented: ({ children }: any) => <div>{children}</div>,
 }));
-
+ 
 jest.mock('echarts', () => ({
   init: () => ({
     setOption: jest.fn(),
@@ -27,20 +27,29 @@ jest.mock('echarts', () => ({
     dispose: jest.fn(),
   }),
 }));
-
-global.fetch = jest.fn(() =>
-  Promise.resolve({
-    ok: true,
-    json: () => Promise.resolve({ success: true, data: { metrics: [], activities: [], requests: [], trends: [], deptStats: [], statusData: [], quickStats: [] } }),
-  }) as jest.Mock
-) as jest.Mock;
-
+ 
+global.fetch = jest.fn(async () => ({
+  ok: true,
+  json: async () => ({
+    success: true,
+    data: {
+      metrics: [],
+      activities: [],
+      requests: [],
+      trends: [],
+      deptStats: [],
+      statusData: [],
+      quickStats: [],
+    },
+  }),
+})) as unknown as typeof fetch;
+ 
 describe('Dashboard', () => {
-  test('renders the dashboard shell after loading data', async () => {
+  test('renders the dashboard screen', async () => {
     render(<Dashboard />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
-    });
+ 
+    expect(await screen.findByText(/dashboard/i)).toBeInTheDocument();
   });
 });
+ 
+ 

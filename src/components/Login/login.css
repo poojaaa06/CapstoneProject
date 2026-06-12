@@ -1,42 +1,55 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 .lp-wrapper {
   min-height: 100vh;
   width: 100%;
+  background-color: #f0f2f5;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   padding: 16px;
-  background-color: #f0f2f5; 
-  overflow: hidden; 
-  box-sizing: border-box; 
+  box-sizing: border-box;
+}
+
+.lp-row {
+  width: 100%;
+  min-height: 100vh; /* Important */
 }
 
 .lp-card {
   width: 100%;
   max-width: 420px;
   border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .lp-title {
-  margin: 0 0 4px 0;
+  margin: 0 0 4px;
   font-size: 24px;
   font-weight: 600;
-  color: #111827; 
   text-align: center;
+  color: #111827;
 }
 
 .lp-subtitle {
-  margin: 0 0 20px 0;
-  font-size: 14px;
-  color: #374151;
+  margin: 0 0 20px;
   text-align: center;
+  font-size: 14px;
+  color: #6b7280;
 }
 
 .lp-actions-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
-  margin-top: 4px;
 }
 
 .lp-link-btn {
@@ -47,58 +60,37 @@
   width: 100%;
 }
 
-.lp-row {
-  width: 100%;
-}
-
-
 .lp-card :focus-visible {
   outline: 3px solid #1d4ed8;
   outline-offset: 2px;
 }
 
-/* ===================================================
-   FIX: Double border on Input.Password in AntD v5.
-   Input.Password renders:
-     <span class="ant-input-affix-wrapper">  ← has border
-       <input class="ant-input" />            ← ALSO has border
-     </span>
-   Both show a border in error / focus state → double ring.
-   Fix: kill the inner input's border so only the wrapper shows.
-   =================================================== */
+/* Fix AntD Password Input Border */
 
 .lp-card .ant-input-affix-wrapper .ant-input {
   border: none !important;
-  box-shadow: none !important;
   outline: none !important;
+  box-shadow: none !important;
 }
 
 .lp-card .ant-input-affix-wrapper {
-  box-shadow: none !important;
   display: flex;
   align-items: center;
 }
 
-/* ===================================================
-   FIX: Prefix icon (UserOutlined / LockOutlined) not
-   vertically centered with the typed text.
-   =================================================== */
 .lp-card .ant-input-affix-wrapper .ant-input-prefix {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   margin-right: 8px;
   line-height: 1;
 }
 
-.lp-card .ant-input-affix-wrapper .ant-input {
-  line-height: 1.5;
-}
-
+.lp-card .ant-input-affix-wrapper:focus,
 .lp-card .ant-input-affix-wrapper:focus-within {
   box-shadow: none !important;
 }
 
-/* Ensure validation help text is never hidden / clipped */
 .lp-card .ant-form-item {
   overflow: visible;
 }
@@ -109,6 +101,15 @@
 }
 
 @media (max-width: 480px) {
-  .lp-card { border-radius: 8px; }
-  .lp-title { font-size: 20px; }
+  .lp-wrapper {
+    padding: 12px;
+  }
+
+  .lp-card {
+    border-radius: 8px;
+  }
+
+  .lp-title {
+    font-size: 20px;
+  }
 }
