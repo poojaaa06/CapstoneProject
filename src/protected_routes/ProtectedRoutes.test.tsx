@@ -14,6 +14,8 @@ jest.mock('src/layout', () => ({
 
 describe('ProtectedRoutes', () => {
   test('renders the outlet content when access is allowed', () => {
+    sessionStorage.setItem('userDetails', JSON.stringify({ name: 'Test User' }));
+
     render(
       <MemoryRouter initialEntries={['/dashboard']}>
         <Routes>
