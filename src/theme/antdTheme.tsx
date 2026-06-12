@@ -36,6 +36,9 @@ const lightTheme = {
     colorPrimary: "#00b96b",
     borderRadius: 4,
     colorBgContainer: "#f6ffed",
+    // Fix: remove the outer box-shadow outline on error fields
+    // so only a single red border is shown (no double border)
+    controlOutlineWidth: 0,
   },
 };
 

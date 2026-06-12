@@ -35,9 +35,7 @@ const NotFoundPage: FC = () => {
   const content: NotFoundContent = notFoundContent;
   const target: AuthTarget = resolveAuthTarget();
 
-  const [secondsLeft, setSecondsLeft] = useState<number>(
-    content.redirectSeconds,
-  );
+  const [secondsLeft, setSecondsLeft] = useState<number>(content.redirectSeconds);
   const [api, contextHolder] = notification.useNotification();
 
   useEffect((): (() => void) => {
@@ -63,13 +61,12 @@ const NotFoundPage: FC = () => {
     };
   }, [api, navigate, target.label, target.path, content.redirectSeconds]);
 
-  const handlePrimary = (): void => {
-    navigate(target.path, { replace: true });
-  };
+  const handlePrimary = (): void => navigate(target.path, { replace: true });
+  const handleBack = (): void => navigate(-1);
 
-  const handleBack = (): void => {
-    navigate(-1);
-  };
+  const titleWords = content.title.trim().split(" ");
+  const titleLead = titleWords.slice(0, -1).join(" ");
+  const titleAccent = titleWords.slice(-1).join(" ");
 
   return (
     <main
@@ -79,14 +76,15 @@ const NotFoundPage: FC = () => {
       aria-describedby="nf-subtitle"
     >
       {contextHolder}
-      <Row justify="center" align="middle" style={{ width: "100%" }}>
-        <Col xs={24} sm={20} md={16} lg={12} xl={10} >
+      <Row justify="start" align="middle" style={{ width: "100%" }}>
+        <Col xs={24} sm={20} md={16} lg={14} xl={12} xxl={10}>
           <section className="nf-card" aria-live="polite">
             <Result
               status="404"
               title={
                 <p id="nf-title" className="nf-title">
-                  {content.code} — {content.title}
+                  {titleLead}{" "}
+                  <span className="nf-title-accent">{titleAccent}.</span>
                 </p>
               }
               subTitle={
@@ -96,17 +94,11 @@ const NotFoundPage: FC = () => {
               }
               extra={
                 <div>
-                  <div
-                    className="nf-actions"
-                    role="group"
-                    aria-label="Navigation options"
-                  >
+                  <div className="nf-actions" role="group" aria-label="Navigation options">
                     <Button
                       type="primary"
                       size="large"
-                      icon={
-                        target.isLoggedIn ? <HomeOutlined /> : <LoginOutlined />
-                      }
+                      icon={target.isLoggedIn ? <HomeOutlined /> : <LoginOutlined />}
                       onClick={handlePrimary}
                       aria-label={`Go to ${target.label}`}
                     >
@@ -121,16 +113,9 @@ const NotFoundPage: FC = () => {
                       Go Back
                     </Button>
                   </div>
-
-                  <div>
-                    <p
-                      className="nf-hint"
-                      aria-live="polite"
-                      aria-atomic="true"
-                    >
-                      Auto-redirecting in <strong>{secondsLeft}s</strong>…
-                    </p>
-                  </div>
+                  <p className="nf-hint" aria-live="polite" aria-atomic="true">
+                    Auto-redirecting in <strong>{secondsLeft}s</strong>…
+                  </p>
                 </div>
               }
             />

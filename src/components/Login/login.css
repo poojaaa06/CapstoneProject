@@ -57,6 +57,56 @@
   outline-offset: 2px;
 }
 
+/* ===================================================
+   FIX: Double border on Input.Password in AntD v5.
+   Input.Password renders:
+     <span class="ant-input-affix-wrapper">  ← has border
+       <input class="ant-input" />            ← ALSO has border
+     </span>
+   Both show a border in error / focus state → double ring.
+   Fix: kill the inner input's border so only the wrapper shows.
+   =================================================== */
+
+.lp-card .ant-input-affix-wrapper .ant-input {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.lp-card .ant-input-affix-wrapper {
+  box-shadow: none !important;
+  display: flex;
+  align-items: center;
+}
+
+/* ===================================================
+   FIX: Prefix icon (UserOutlined / LockOutlined) not
+   vertically centered with the typed text.
+   =================================================== */
+.lp-card .ant-input-affix-wrapper .ant-input-prefix {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 8px;
+  line-height: 1;
+}
+
+.lp-card .ant-input-affix-wrapper .ant-input {
+  line-height: 1.5;
+}
+
+.lp-card .ant-input-affix-wrapper:focus-within {
+  box-shadow: none !important;
+}
+
+/* Ensure validation help text is never hidden / clipped */
+.lp-card .ant-form-item {
+  overflow: visible;
+}
+
+.lp-card .ant-form-item-explain {
+  overflow: visible;
+  margin-top: 6px;
+}
 
 @media (max-width: 480px) {
   .lp-card { border-radius: 8px; }

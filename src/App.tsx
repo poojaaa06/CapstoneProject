@@ -40,6 +40,7 @@ function App() {
                   />
                   <Route path="requests" element={<MyRequests />} />
                   <Route path="profile" element={<Profile />} />
+                   <Route path="dashboard" element={<Dashboard />} />
                 </Route>
 
                 <Route path="*" element={<NotFoundPage />} />

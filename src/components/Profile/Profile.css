@@ -1,391 +1,747 @@
   *,
+
   .ant-typography,
+
   .ant-input,
+
   .ant-select,
+
   .ant-btn,
+
   .ant-form,
+
   .ant-form-item-label > label {
+
     font-family: 'Inter', 'Poppins', 'Segoe UI', sans-serif !important;
-  }
 
+  }
+ 
   /* ── Page Header ─────────────────────────────────────────────────────────── */
+
   .page-header {
+
     display: flex;
+
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 28px;
-  }
 
+    align-items: center;
+
+    margin-bottom: 28px;
+
+  }
+ 
   .page-header .ant-btn {
+
     min-width: 120px;
-    height: 42px;
-    border-radius: 10px;
-    font-weight: 600;
-  }
 
+    height: 42px;
+
+    border-radius: 10px;
+
+    font-weight: 600;
+
+  }
+ 
   /* ── Cards ───────────────────────────────────────────────────────────────── */
+
   .profile-header-card,
+
   .profile-details-card {
+
     background: #ffffff;
+
     border: none;
+
     border-radius: 20px;
+
     overflow: hidden;
+
     box-shadow:
+
       0 4px 12px rgba(0, 0, 0, 0.04),
+
       0 10px 30px rgba(0, 0, 0, 0.03);
+
     transition: box-shadow 0.25s ease;
-  }
 
+  }
+ 
   .profile-header-card:hover,
+
   .profile-details-card:hover {
+
     box-shadow:
+
       0 8px 20px rgba(0, 0, 0, 0.06),
+
       0 20px 40px rgba(0, 0, 0, 0.04);
-  }
 
+  }
+ 
   .profile-header-card {
+
     margin-bottom: 28px;
-  }
 
+  }
+ 
   /* ── Profile Header ──────────────────────────────────────────────────────── */
+
   .profile-header {
+
     padding: 40px 24px;
+
     display: flex;
+
     flex-direction: column;
-    align-items: center;
-  }
 
+    align-items: center;
+
+  }
+ 
   /* Avatar wrapper — replaces the inline position:relative div */
+
   .avatar-wrapper {
+
     position: relative;
+
     display: inline-block;
-  }
 
+  }
+ 
   /* Camera overlay button — replaces the inline style on Button */
-  .camera-btn {
+
+  .edit-btn {
+
     position: absolute;
+
     bottom: 0;
+
     right: 0;
+
     z-index: 10;
-  }
 
+  }
+ 
   .profile-avatar {
-    border: 4px solid #22c55e;
+
+    border: 2px solid #979494;
+
     box-shadow:
-      0 10px 25px rgba(34, 197, 94, 0.18),
+
+      0 10px 25px rgba(127, 211, 157, 0.18),
+
       0 0 0 8px rgba(34, 197, 94, 0.05);
+
     transition: transform 0.3s ease;
-  }
 
+  }
+ 
   .profile-avatar:hover {
+
     transform: scale(1.04);
-  }
 
+  }
+ 
   .profile-name {
+
     margin-top: 20px;
+
     margin-bottom: 6px;
-    font-size: 32px;
+
+    font-size: 36px;
+
     font-weight: 800;
+
     color: #111827;
+
     letter-spacing: -1px;
-    text-align: center;
-  }
 
+    text-align: center;
+
+  }
+ 
   .profile-email {
-    font-size: 15px;
+
+    font-size: 16px;
+
     font-weight: 500;
+
     color: #6b7280;
+
     text-align: center;
+
   }
 
-  .upload-btn {
-    margin-top: 18px;
-    min-width: 160px;
-    height: 42px;
-    border-radius: 10px;
-  }
+  /* ── Bio ───────────────────────────────────────────────────────── */
+ 
+.profile-bio {
 
-  /* ── Details Card ────────────────────────────────────────────────────────── */
-  .profile-details-card {
-    padding: 32px;
-  }
-
-  .profile-details-card .ant-form {
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  .ant-form-item {
-    margin-bottom: 24px !important;
-  }
-
-  .profile-details-card .ant-row {
-    row-gap: 6px;
-  }
-
-  /* ── Form Labels ─────────────────────────────────────────────────────────── */
-  .ant-divider-inner-text {
-    font-size: 18px;
-    font-weight: 700;
-    color: #111827;
-  }
-
-  .ant-form-item-label {
-    padding-bottom: 6px !important;
-  }
-
-  .ant-form-item-label > label,
-  .field-label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #1f2937;
-  }
-
-  /* label-no-padding — replaces inline padding:0 on labelCol in view mode */
-  .label-no-padding > label {
-    padding: 0 !important;
-  }
-
-  .required-star {
-    color: #ef4444;
-    margin-left: 2px;
-  }
-
-  .profile-view-text {
-    min-height: 48px;
-    display: flex;
-    align-items: center;
-    font-size: 15px;
-    color: #111827;
-  }
-
-  /* ── Inputs ──────────────────────────────────────────────────────────────── */
-  .ant-input,
-  .ant-input-affix-wrapper,
-  .ant-select-selector,
-  .ant-picker {
-    height: 48px !important;
-    border-radius: 10px !important;
-    border: 1px solid #d1d5db !important;
-    font-size: 15px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-  }
-
-  /* Default: hover stays grey */
-  .ant-input:hover,
-  .ant-input-affix-wrapper:hover,
-  .ant-select-selector:hover,
-  .ant-picker:hover {
-    border-color: #d1d5db !important;
-  }
-
-  /* Only the focused field turns green */
-  .ant-input:focus,
-  .ant-input-affix-wrapper-focused,
-  .ant-select-focused .ant-select-selector,
-  .ant-picker-focused {
-    border-color: #16a34a !important;
-    box-shadow: none !important;
-  }
-
-  /* Success */
-  .ant-form-item-has-success .ant-input,
-  .ant-form-item-has-success .ant-input-affix-wrapper,
-  .ant-form-item-has-success .ant-select-selector,
-  .ant-form-item-has-success .ant-picker {
-    border-color: #16a34a !important;
-  }
-
-  /* Error */
-  .ant-form-item-has-error .ant-input,
-  .ant-form-item-has-error .ant-input-affix-wrapper,
-  .ant-form-item-has-error .ant-select-selector,
-  .ant-form-item-has-error .ant-picker {
-    border-color: #ef4444 !important;
-  }
-
-  .ant-form-item-explain-error {
-    color: #ef4444 !important;
-    font-size: 12px;
-    font-weight: 500;
-  }
-
-  .ant-input::placeholder,
-  textarea::placeholder {
-    color: #9ca3af;
-  }
-
-  .ant-input[disabled],
-  .ant-select-disabled {
-    background: #f8fafc !important;
-    color: #4b5563 !important;
-  }
-
-  /* Textarea — replaces inline resize/width on the address field */
-  .address-textarea {
-    resize: vertical;
-    width: 100%;
-  }
-
-  .ant-input-textarea textarea {
-    min-height: 120px !important;
-    max-height: 220px;
-    padding: 12px;
-    border-radius: 10px !important;
-    line-height: 1.6;
-    resize: vertical;
-  }
-
-  /* Gender select — replaces inline width: 40% */
-  .select-gender {
-    width: 40%;
-  }
-
-  /* DOB picker — replaces inline width: 40% */
-  .datepicker-dob {
-    width: 40%;
-  }
-
-  /* ── Phone Number Field ───────────────────────────────────────────────────── */
-
-.input-addon-wrapper {
-  display: flex;
   width: 100%;
-  align-items: stretch;
-}
 
-.country-code-select {
-  width: 120px;
-  flex-shrink: 0;
+  max-width: 550px;
+
+  margin-top: 18px;
+
+  display: flex;
+
+  justify-content: center;
+
+}
+ 
+.profile-bio p {
+
+  margin: 0;
+
+  padding: 0 12px;
+
+  font-size: 15px;
+
+  font-weight: 400;
+
+  line-height: 1.8;
+
+  color: #6b7280;
+
+  text-align: center;
+
+  white-space: pre-wrap;
+
+  word-break: break-word;
+
+}
+ 
+/* Editable Bio */
+ 
+.bio-textarea {
+
+  width: 80%;
+
+  min-height: 110px;
+
+  padding: 12px 14px;
+
+  border: 1px solid #d1d5db;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  font-size: 15px;
+
+  font-weight: 500;
+
+  color: #111827;
+
+  line-height: 1.6;
+
+  font-family: inherit;
+
+  resize: vertical;
+
+  transition: all 0.2s ease;
+
+}
+ 
+.bio-textarea:hover {
+
+  border-color: #d1d5db;
+
+}
+ 
+.bio-textarea:focus {
+
+  outline: none;
+
+  border-color: #16a34a;
+
+  box-shadow: none;
+
+}
+ 
+/* Validation states */
+ 
+.ant-form-item-has-error .bio-textarea {
+
+  border-color: #ef4444 !important;
+
+}
+ 
+.ant-form-item-has-success .bio-textarea {
+
+  border-color: #16a34a !important;
+
+}
+ 
+  .upload-btn {
+
+    margin-top: 18px;
+
+    min-width: 160px;
+
+    height: 42px;
+
+    border-radius: 10px;
+
+  }
+ 
+  /* ── Details Card ────────────────────────────────────────────────────────── */
+
+  .profile-details-card {
+
+    padding: 32px;
+
+  }
+ 
+  .profile-details-card .ant-form {
+
+    max-width: 900px;
+
+    margin: 0 auto;
+
+  }
+ 
+  .ant-form-item {
+
+    margin-bottom: 24px !important;
+
+  }
+ 
+  .profile-details-card .ant-row {
+
+    row-gap: 6px;
+
+  }
+ 
+  /* ── Form Labels ─────────────────────────────────────────────────────────── */
+
+  .ant-divider-inner-text {
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+    color: #111827;
+
+  }
+ 
+  .ant-form-item-label {
+
+    padding-bottom: 6px !important;
+
+  }
+ 
+  .ant-form-item-label > label,
+
+  .field-label {
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: #1f2937;
+
+  }
+ 
+  /* label-no-padding — replaces inline padding:0 on labelCol in view mode */
+
+  .label-no-padding > label {
+
+    padding: 0 !important;
+
+  }
+ 
+  .required-star {
+
+    color: #ef4444;
+
+    margin-left: 2px;
+
+  }
+ 
+  .profile-view-text {
+
+    min-height:36px;
+
+    display: flex;
+
+    align-items: center;
+
+    font-size: 15px;
+
+    color: #111827;
+
+  }
+ 
+  /* ── Inputs ──────────────────────────────────────────────────────────────── */
+
+  .ant-input,
+
+  .ant-input-affix-wrapper,
+
+  .ant-select-selector,
+
+  .ant-picker {
+
+    height:36px !important;
+
+    border-radius: 10px !important;
+
+    border: 1px solid #d1d5db !important;
+
+    font-size: 15px;
+
+    font-weight: 500;
+
+    transition: all 0.2s ease;
+
+  }
+ 
+  /* Default: hover stays grey */
+
+  .ant-input:hover,
+
+  .ant-input-affix-wrapper:hover,
+
+  .ant-select-selector:hover,
+
+  .ant-picker:hover {
+
+    border-color: #d1d5db !important;
+
+  }
+ 
+  /* Only the focused field turns green */
+
+  .ant-input:focus,
+
+  .ant-input-affix-wrapper-focused,
+
+  .ant-select-focused .ant-select-selector,
+
+  .ant-picker-focused {
+
+    border-color: #16a34a !important;
+
+    box-shadow: none !important;
+
+  }
+ 
+  /* Success */
+
+  .ant-form-item-has-success .ant-input,
+
+  .ant-form-item-has-success .ant-input-affix-wrapper,
+
+  .ant-form-item-has-success .ant-select-selector,
+
+  .ant-form-item-has-success .ant-picker {
+
+    border-color: #16a34a !important;
+
+  }
+ 
+  /* Error */
+
+  .ant-form-item-has-error .ant-input,
+
+  .ant-form-item-has-error .ant-input-affix-wrapper,
+
+  .ant-form-item-has-error .ant-select-selector,
+
+  .ant-form-item-has-error .ant-picker {
+
+    border-color: #ef4444 !important;
+
+  }
+ 
+  .ant-form-item-explain-error {
+
+    color: #ef4444 !important;
+
+    font-size: 12px;
+
+    font-weight: 500;
+
+  }
+ 
+  .ant-input::placeholder,
+
+  textarea::placeholder {
+
+    color: #9ca3af;
+
+  }
+ 
+  .ant-input[disabled],
+
+  .ant-select-disabled {
+
+    background: #f8fafc !important;
+
+    color: #4b5563 !important;
+
+  }
+ 
+  /* Textarea — replaces inline resize/width on the address field */
+
+  .address-textarea {
+
+    resize: vertical;
+
+    width: 100%;
+
+  }
+ 
+  .ant-input-textarea textarea {
+
+    min-height: 120px !important;
+
+    max-height: 220px;
+
+    padding: 12px;
+
+    border-radius: 10px !important;
+
+    line-height: 1.6;
+
+    resize: vertical;
+
+  }
+ 
+  /* Gender select — replaces inline width: 40% */
+
+  .select-gender {
+
+    width: 40%;
+
+  }
+ 
+  /* DOB picker — replaces inline width: 40% */
+
+  .datepicker-dob {
+
+    width: 100%;
+
+  }
+ 
+  /* ── Phone Number Field ───────────────────────────────────────────────────── */
+ 
+.input-addon-wrapper {
+
+  display: flex;
+
+  width: 100%;
+
+  align-items: stretch;
+
 }
 
 .country-code-select .ant-select-selector {
-  height: 48px !important;
+
+  height:36px !important;
+
   border-radius: 10px 0 0 10px !important;
+
   border-right: none !important;
+
   display: flex;
+
   align-items: center;
+
   padding: 0 12px !important;
-}
 
+}
+ 
 .country-code-select.ant-select-focused .ant-select-selector {
-  border-color: #16a34a !important;
-  box-shadow: none !important;
-}
 
+  border-color: #16a34a !important;
+
+  box-shadow: none !important;
+
+}
+ 
 .addon-input {
+
   flex: 1;
-  height: 48px !important;
+
+  height:36px !important;
+
   border-radius: 0 10px 10px 0 !important;
+
   border-left: none !important;
-  box-shadow: none !important;
-}
 
+  box-shadow: none !important;
+
+}
+ 
 .addon-input:focus {
+
   border-color: #16a34a !important;
+
   box-shadow: none !important;
-}
 
+}
+ 
 /* Success State */
-
+ 
 .ant-form-item-has-success
-  .country-code-select
-  .ant-select-selector {
-  border-color: #16a34a !important;
-}
 
+  .country-code-select
+
+  .ant-select-selector {
+
+  border-color: #16a34a !important;
+
+}
+ 
 .ant-form-item-has-success .addon-input {
+
   border-color: #16a34a !important;
-}
 
+}
+ 
 /* Error State */
-
+ 
 .ant-form-item-has-error
+
   .country-code-select
+
   .ant-select-selector {
-  border-color: #ef4444 !important;
-}
 
+  border-color: #ef4444 !important;
+
+}
+ 
 .ant-form-item-has-error .addon-input {
+
   border-color: #ef4444 !important;
-}
 
+}
+ 
 /* Mobile */
-
+ 
 @media (max-width: 768px) {
+
   .country-code-select {
+
     width: 100px;
+
   }
+
 }
+
   /* ── Primary Button ──────────────────────────────────────────────────────── */
+
   .ant-btn-primary {
+
     background: #16a34a;
+
     border-color: #16a34a;
+
     border-radius: 10px;
+
     font-weight: 600;
+
     height: 44px;
+
     transition: all 0.25s ease;
-  }
 
+  }
+ 
   .ant-btn-primary:hover {
+
     background: #15803d !important;
+
     border-color: #15803d !important;
+
     transform: translateY(-1px);
-  }
 
+  }
+ 
   /* ── Upload ──────────────────────────────────────────────────────────────── */
+
   .ant-upload {
+
     display: flex;
+
     justify-content: center;
-  }
 
+  }
+ 
   .ant-upload-wrapper {
+
     margin-top: 12px;
-  }
 
+  }
+ 
   /* ── Responsive ──────────────────────────────────────────────────────────── */
+
   @media (max-width: 768px) {
-
+ 
     .page-header {
+
       flex-direction: column;
+
       gap: 12px;
-    }
 
+    }
+ 
     .profile-header {
+
       padding: 28px 16px;
-    }
 
+    }
+ 
     .profile-name {
+
       font-size: 26px;
-    }
 
+    }
+ 
     .profile-avatar {
+
       width: 115px !important;
+
       height: 115px !important;
-    }
 
+    }
+ 
     .profile-details-card {
+
       padding: 20px;
-    }
-  }
 
+    }
+
+  }
+ 
   @media (max-width: 480px) {
-
+ 
     .profile-name {
+
       font-size: 22px;
-    }
 
+    }
+ 
     .profile-email {
+
       font-size: 13px;
-    }
 
+    }
+ 
     .profile-avatar {
+
       width: 100px !important;
+
       height: 100px !important;
+
+    }
+ 
+    .page-header .ant-btn {
+
+      width: 100%;
+
     }
 
-    .page-header .ant-btn {
-      width: 100%;
-    }
   }
+
+ 

@@ -23,7 +23,7 @@ import {
   LoginFormValues,
   LoginApiResponse,
   SummaryApiResponse,
-} from "src/types/auth.types";
+} from "src/types/auth.type";
 
 import "./login.css";
 
@@ -52,7 +52,7 @@ const LoginPage: React.FC = () => {
 
       sessionStorage.setItem("sessionId", sessionId);
 
-      navigate("/assets", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch {
       notification.error({
         message: "Unable to load your profile. Please try again.",
@@ -113,7 +113,7 @@ const LoginPage: React.FC = () => {
               id="lp-title"
               className="lp-title"
             >
-              Sign in
+              Login
             </Typography.Title>
 
             <p className="lp-subtitle">

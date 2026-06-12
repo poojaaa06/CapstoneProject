@@ -13,7 +13,7 @@
 
 .register-card {
   width: 100%;
-  max-width: 560px;
+  max-width: 800px;
 }
 
 .register-card .ant-card-head-title {
@@ -22,7 +22,7 @@
 }
 
 .register-form .ant-form-item {
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 .register-phone-input {
@@ -31,9 +31,24 @@
 
 .register-actions {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
   flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.register-actions > .ant-btn {
+  height: 40px;
+}
+
+.register-actions > div {
+  display: flex;
+  align-items: center;
+}
+
+.register-actions > div .ant-btn {
+  height: 40px;
 }
 
 .register-actions .ant-btn {
@@ -61,10 +76,138 @@
   .register-card {
     max-width: 100%;
   }
+
   .register-actions {
     justify-content: stretch;
   }
+
   .register-actions .ant-btn {
     flex: 1 1 auto;
   }
+}
+
+/* ===================================================
+   FIX: Double border on Input.Password & phone fields.
+
+   Root cause: In AntD v5, Input.Password renders:
+     <span class="ant-input-affix-wrapper">  ← has border
+       <input class="ant-input" />            ← ALSO has border
+       <span class="ant-input-suffix" />
+     </span>
+   Both the wrapper AND the inner input show a border
+   in every state (normal, focused, error).
+
+   Fix: always suppress the inner input's own border so
+   only the wrapper provides the single visible border.
+   =================================================== */
+
+/* Input.Password — kill inner input border in ALL states */
+.register-form .ant-input-affix-wrapper .ant-input {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Kill any box-shadow on the wrapper itself (no glow ring) */
+.register-form .ant-input-affix-wrapper {
+  box-shadow: none !important;
+}
+
+.register-form .ant-input-affix-wrapper:focus-within {
+  box-shadow: none !important;
+}
+
+/* Phone number — group wrapper already shows the outer border;
+   suppress any extra box-shadow / glow on it */
+.register-form .ant-input-group-wrapper {
+  box-shadow: none !important;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+}
+
+.register-form .ant-input-group-wrapper-status-error {
+  border-color: #ff4d4f;
+}
+
+.register-form .ant-input-group-wrapper .ant-input-group {
+  display: flex;
+}
+
+/* ===================================================
+   FIX: Phone field double border (country code addon)
+
+   Root cause: the outer .ant-input-group-wrapper border
+   AND the inner .ant-select-selector (addon) border AND
+   the .ant-input border all render at once → visible
+   double/triple lines around the addon.
+
+   Fix: only the outer group wrapper shows a border.
+   The addon select and the input itself are borderless,
+   with a single divider line between them.
+   =================================================== */
+
+.register-form .ant-input-group-wrapper .ant-input-group-addon {
+  background-color: #fafafa;
+  border: none !important;
+  border-right: 1px solid #d9d9d9 !important;
+  border-radius: 0 !important;
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.register-form .ant-input-group-wrapper .ant-input-group-addon .ant-select-selector {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.register-form .ant-input-group-wrapper .ant-input {
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* Error state — color the outer wrapper border red, keep addon neutral */
+.register-form .ant-input-group-wrapper-status-error .ant-input-group-addon {
+  border-right-color: #d9d9d9 !important;
+}
+
+
+/* ===================================================
+   FIX: Help/error text getting cut off below Select
+   and other fields (AntD clips/animates this region).
+   =================================================== */
+
+.register-form .ant-form-item-with-help,
+.register-form .ant-form-item-control,
+.register-form .ant-form-item-control-input,
+.register-form .ant-row,
+.register-form .ant-form-item-explain {
+  overflow: visible !important;
+}
+
+.register-form .ant-form-item-explain {
+  position: relative;
+  height: auto !important;
+  min-height: 0 !important;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.4;
+  margin-top: 8px;
+  padding-top: 2px;
+}
+
+.register-form .ant-form-item-explain-error {
+  display: block;
+}
+
+/* Profile photo upload row on Step 3 */
+.register-avatar-upload {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
