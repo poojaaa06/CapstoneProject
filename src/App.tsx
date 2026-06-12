@@ -16,7 +16,7 @@ import Assets from "./components/Assets";
 import MaintenanceOrders from "./components/MaintenanceOrders";
 import WorkInstructions from "./components/WorkInstructions";
 import MyRequests from "./components/MyRequests";
-
+ 
 function App() {
   return (
     <AntdApp>
@@ -27,22 +27,16 @@ function App() {
               <Routes>
                 <Route path="/" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
-
+ 
                 <Route element={<PrivateRoutes />}>
+                  <Route path="dashboard" element={<Dashboard />} />
                   <Route path="assets" element={<Assets />} />
-                  <Route
-                    path="maintenance-orders"
-                    element={<MaintenanceOrders />}
-                  />
-                  <Route
-                    path="work-instructions"
-                    element={<WorkInstructions />}
-                  />
+                  <Route path="maintenance-orders" element={<MaintenanceOrders />} />
+                  <Route path="work-instructions" element={<WorkInstructions />} />
                   <Route path="requests" element={<MyRequests />} />
                   <Route path="profile" element={<Profile />} />
-                   <Route path="dashboard" element={<Dashboard />} />
                 </Route>
-
+ 
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </ThemeProvider>
@@ -52,5 +46,6 @@ function App() {
     </AntdApp>
   );
 }
-
+ 
 export default App;
+ 

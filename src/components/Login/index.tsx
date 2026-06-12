@@ -14,7 +14,7 @@ import {
   notification,
 } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
-
+ 
 import { useAppContext } from "src/context/appContext";
 import { loginSchema } from "src/validations/loginSchema";
 import { loginAPI } from "src/services/loginApi";
@@ -24,34 +24,34 @@ import {
   LoginApiResponse,
   SummaryApiResponse,
 } from "src/types/auth.type";
-
+ 
 import "./login.css";
-
+ 
 const SECRET_KEY: string = process.env.REACT_APP_SECRET_KEY ?? "";
-
+ 
 const initialValues: LoginFormValues = {
   user_unique_id: "",
   user_password: "",
   remember: true,
 };
-
+ 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { setUserDetails } = useAppContext();
-
+ 
   const fetchSummary = async (sessionId: string): Promise<void> => {
     try {
       const summary: SummaryApiResponse = await getSummaryAPI(sessionId);
-
+ 
       setUserDetails(summary.userSummary);
-
+ 
       sessionStorage.setItem(
         "userDetails",
         JSON.stringify(summary.userSummary),
       );
-
+ 
       sessionStorage.setItem("sessionId", sessionId);
-
+ 
       navigate("/dashboard", { replace: true });
     } catch {
       notification.error({
@@ -59,7 +59,7 @@ const LoginPage: React.FC = () => {
       });
     }
   };
-
+ 
   const formik = useFormik<LoginFormValues>({
     initialValues,
     validationSchema: loginSchema,
@@ -70,20 +70,20 @@ const LoginPage: React.FC = () => {
         });
         return;
       }
-
+ 
       const encryptedPassword: string = CryptoJS.AES.encrypt(
         values.user_password,
         SECRET_KEY,
       ).toString();
-
+ 
       try {
         const response = await loginAPI({
           user_unique_id: values.user_unique_id,
           user_password: encryptedPassword,
         });
-
+ 
         const data: LoginApiResponse | undefined = response?.data;
-
+ 
         if (
           response &&
           [200, 201].includes(response.status) &&
@@ -102,7 +102,7 @@ const LoginPage: React.FC = () => {
       }
     },
   });
-
+ 
   return (
     <main className="lp-wrapper" aria-labelledby="lp-title">
       <Row justify="center" align="middle" className="lp-row">
@@ -115,11 +115,11 @@ const LoginPage: React.FC = () => {
             >
               Login
             </Typography.Title>
-
+ 
             <p className="lp-subtitle">
               Use your account credentials
             </p>
-
+ 
             <Form
               layout="vertical"
               onFinish={() => formik.handleSubmit()}
@@ -151,7 +151,7 @@ const LoginPage: React.FC = () => {
                   onBlur={formik.handleBlur}
                 />
               </Form.Item>
-
+ 
               <Form.Item
                 label="Password"
                 htmlFor="user_password"
@@ -178,7 +178,7 @@ const LoginPage: React.FC = () => {
                   onBlur={formik.handleBlur}
                 />
               </Form.Item>
-
+ 
               <Form.Item>
                 <Checkbox
                   id="remember"
@@ -194,7 +194,7 @@ const LoginPage: React.FC = () => {
                   Remember me
                 </Checkbox>
               </Form.Item>
-
+ 
               <Form.Item>
                 <Button
                   type="primary"
@@ -206,7 +206,7 @@ const LoginPage: React.FC = () => {
                   Sign in
                 </Button>
               </Form.Item>
-
+ 
               <div className="lp-actions-row">
                 <Button
                   type="link"
@@ -215,7 +215,7 @@ const LoginPage: React.FC = () => {
                 >
                   Forgot password?
                 </Button>
-
+ 
                 <Button
                   type="link"
                   className="lp-link-btn"
@@ -230,4 +230,7 @@ const LoginPage: React.FC = () => {
       </Row>
     </main>
   );
-}
+};
+ 
+export default LoginPage;
+ 
