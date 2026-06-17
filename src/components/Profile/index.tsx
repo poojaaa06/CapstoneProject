@@ -769,7 +769,7 @@ export const Profile: React.FC = () => {
         value={values.user_address}
         onChange={handleChange}
         onBlur={handleBlur}
-        placeholder="Enter your address (one line per field)"
+        placeholder="Enter your address"
       />
     ) : (
       <div>

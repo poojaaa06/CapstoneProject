@@ -937,7 +937,7 @@ const RegisterPage: React.FC = () => {
     setFieldValue("user_address", addressArray);
   }}
   onBlur={handleBlur}
-  placeholder="Enter your address (one line per field)"
+  placeholder="Enter your address"
 />
                       </Form.Item>
                     </Col>
