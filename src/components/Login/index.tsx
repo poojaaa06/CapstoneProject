@@ -1,15 +1,16 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
-import CryptoJS from "crypto-js";
+//import CryptoJS from "crypto-js";
 import {
+  App,
   Card,
   Form,
   Input,
   Checkbox,
   Button,
   Typography,
-  notification,
+  //notification,
 } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 
@@ -17,10 +18,7 @@ import { useAppContext } from "src/context/appContext";
 import { loginSchema } from "src/validations/loginSchema";
 import { loginAPI } from "src/services/loginApi";
 import { getSummaryAPI } from "src/services/summaryAPi";
-import {
-  LoginFormValues,
-  LoginApiResponse,
-} from "src/types/auth.type";
+import { LoginFormValues, LoginApiResponse, UserSummary } from "src/types/auth.type";
 
 import "./login.css";
 
@@ -33,6 +31,8 @@ const initialValues: LoginFormValues = {
 };
 
 const LoginPage: React.FC = () => {
+  const { notification } = App.useApp();
+
   const navigate = useNavigate();
   const { setUserDetails } = useAppContext();
 
@@ -41,13 +41,15 @@ const LoginPage: React.FC = () => {
       const response = await getSummaryAPI(sessionId);
 
       const summaryData =
-        response?.data?.userSummary ||
-        response?.data?.data?.userSummary;
+        response?.data?.userSummary || response?.data?.data?.userSummary;
 
       console.log("Summary data received:", summaryData);
 
-      if (summaryData) {
-        const sessionUserDetails = {
+      if (
+        summaryData &&
+        summaryData.user_unique_id === formik.values.user_unique_id
+      ) {
+        const sessionUserDetails: UserSummary = {
           user_unique_id: summaryData.user_unique_id,
           user_first_name: summaryData.user_first_name,
           user_middle_name: summaryData.user_middle_name || "",
@@ -62,31 +64,19 @@ const LoginPage: React.FC = () => {
           user_city: summaryData.user_city || "",
           user_pincode: summaryData.user_pincode || "",
           user_landmark: summaryData.user_landmark || "",
-          user_address: summaryData.user_address || [],
+          user_address: summaryData.user_address || "",
           user_gender: summaryData.user_gender,
           user_dob: summaryData.user_dob,
           prefix: summaryData.prefix || "91",
 
-          roles: ["admin"],
+          roles: summaryData.roles || [],
 
-          services: [
-            "Manage Machines 3D",
-            "Maintenance Orders",
-            "Work Instructions",
-            "Procurement",
-            "My Requests",
-            "Services",
-            "Dashboard",
-            "Profile",
-            "Events",
-            "Analytics",
-            "Rewards",
-          ],
+          services: summaryData.services || [],
         };
 
         sessionStorage.setItem(
           "userDetails",
-          JSON.stringify(sessionUserDetails)
+          JSON.stringify(sessionUserDetails),
         );
 
         sessionStorage.setItem("sessionId", sessionId);
@@ -95,7 +85,9 @@ const LoginPage: React.FC = () => {
 
         navigate("/dashboard", { replace: true });
       } else {
-        throw new Error("No user summary found");
+        notification.error({
+          message: "User profile mismatch.",
+        });
       }
     } catch (error) {
       console.error("Fetch summary error:", error);
@@ -118,15 +110,15 @@ const LoginPage: React.FC = () => {
         return;
       }
 
-      const encryptedPassword = CryptoJS.AES.encrypt(
-        values.user_password,
-        SECRET_KEY
-      ).toString();
+      // const encryptedPassword = CryptoJS.AES.encrypt(
+      //   values.user_password,
+      //   SECRET_KEY,
+      // ).toString();
 
       try {
         const response = await loginAPI({
           user_unique_id: values.user_unique_id,
-          user_password: encryptedPassword,
+          user_password: values.user_password, //not encrypted for now
         });
 
         const data: LoginApiResponse | undefined = response?.data;
@@ -136,15 +128,23 @@ const LoginPage: React.FC = () => {
           [200, 201].includes(response.status) &&
           data?.sessionId
         ) {
-          await fetchSummary(data.sessionId);
-        } else {
+  notification.success({
+    message: "Login Successful",
+    description: "Welcome back!",
+    placement: "topRight",
+    duration: 2,
+    onClose: async () => {
+      await fetchSummary(data.sessionId);
+    },
+  });
+} else {
           notification.error({
             message: "Invalid credentials.",
           });
         }
-      } catch {
+      } catch (error: any) {
         notification.error({
-          message: "Something went wrong. Please try again.",
+          message: error.message || "Something went wrong. Please try again.",
         });
       }
     },
@@ -153,17 +153,11 @@ const LoginPage: React.FC = () => {
   return (
     <main className="lp-wrapper" aria-labelledby="lp-title">
       <Card className="lp-card" variant="outlined">
-        <Typography.Title
-          level={1}
-          id="lp-title"
-          className="lp-title"
-        >
+        <Typography.Title level={1} id="lp-title" className="lp-title">
           Login
         </Typography.Title>
 
-        <p className="lp-subtitle">
-          Use your account credentials
-        </p>
+        <p className="lp-subtitle">Use your account credentials</p>
 
         <Form
           layout="vertical"
@@ -174,20 +168,16 @@ const LoginPage: React.FC = () => {
             label="Username"
             htmlFor="user_unique_id"
             validateStatus={
-              formik.touched.user_unique_id &&
-              formik.errors.user_unique_id
+              formik.touched.user_unique_id && formik.errors.user_unique_id
                 ? "error"
                 : ""
             }
-            help={
-              formik.touched.user_unique_id &&
-              formik.errors.user_unique_id
-            }
+            help={formik.touched.user_unique_id && formik.errors.user_unique_id}
           >
             <Input
               id="user_unique_id"
               name="user_unique_id"
-              prefix={<UserOutlined aria-hidden />}
+              prefix={<UserOutlined aria-hidden />} 
               autoComplete="username"
               aria-label="Username"
               aria-required="true"
@@ -201,15 +191,11 @@ const LoginPage: React.FC = () => {
             label="Password"
             htmlFor="user_password"
             validateStatus={
-              formik.touched.user_password &&
-              formik.errors.user_password
+              formik.touched.user_password && formik.errors.user_password
                 ? "error"
                 : ""
             }
-            help={
-              formik.touched.user_password &&
-              formik.errors.user_password
-            }
+            help={formik.touched.user_password && formik.errors.user_password}
           >
             <Input.Password
               id="user_password"
@@ -230,10 +216,7 @@ const LoginPage: React.FC = () => {
               name="remember"
               checked={formik.values.remember}
               onChange={(e) =>
-                formik.setFieldValue(
-                  "remember",
-                  e.target.checked
-                )
+                formik.setFieldValue("remember", e.target.checked)
               }
             >
               Remember me

@@ -43,8 +43,8 @@ export const forgotPasswordAPI = async (formData: {
       } else {
         // Return generic message for security (but still success)
         return {
-          success: true,
-          message: "If an account exists with this username, a reset link will be sent.",
+           success: false,
+  message: "Username does not exist.",
         };
       }
     } else {
@@ -54,7 +54,6 @@ export const forgotPasswordAPI = async (formData: {
     }
   } catch (error) {
     console.error("Forgot password error:", error);
-    // Return a user-friendly error
     return {
       success: false,
       message: "Unable to process your request. Please try again later.",

@@ -21,7 +21,7 @@ body,
 
 .lp-row {
   width: 100%;
-  min-height: 100vh; /* Important */
+  min-height: 100vh; 
 }
 
 .lp-card {

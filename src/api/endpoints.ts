@@ -1,5 +1,5 @@
 import { devEnv } from "src/utils/constants";
-
+ 
 export interface Endpoints {
     VALIDATE_USERNAME: string;
     VALIDATE_EMAIL: string;
@@ -8,25 +8,26 @@ export interface Endpoints {
     SIGN_UP: string;
     GET_SUMMARY: string;
     UPDATE_PROFILE: string;
-     FORGOT_PASSWORD: string; // Add this
+    FORGOT_PASSWORD: string; 
 }
-
+ 
 let Endpoints: Endpoints;
-
+ 
 // TEMPORARILY FORCE STUBS TO TEST
-const isDevEnv = true; // Force this to true for now
-
+const isDevEnv =
+  process.env.REACT_APP_ENVIRONMENT === devEnv.DEV; 
+ 
 if (isDevEnv) {
     Endpoints = {
         // Use YOUR actual filenames (camelCase, not hyphenated)
-        VALIDATE_USERNAME: "/stubs/validateUsername.json",   // ✅ Fixed
-        VALIDATE_EMAIL: "/stubs/validateEmail.json",         // ✅ Fixed
-        VALIDATE_PHONE: "/stubs/validatePhone.json",         // ✅ Fixed
+        VALIDATE_USERNAME: "/stubs/validateUsername.json",   
+        VALIDATE_EMAIL: "/stubs/validateEmail.json",         
+        VALIDATE_PHONE: "/stubs/validatePhone.json",         
         GET_SUMMARY: "/stubs/summary.json",
         LOGIN: "/stubs/login.json",
         SIGN_UP: "/stubs/register.json",
-        UPDATE_PROFILE: "/stubs/udateProfile.json", 
-         FORGOT_PASSWORD: "/stubs/forgotPassword.json", // Add this         // ⚠️ Note: you have "udateProfile.json" (typo)
+        UPDATE_PROFILE: "/stubs/updateProfile.json",
+        FORGOT_PASSWORD: "/stubs/forgotPassword.json",   
     };
 } else {
     Endpoints = {
@@ -40,5 +41,5 @@ if (isDevEnv) {
         FORGOT_PASSWORD: "/api/auth/forgot-password"
     };
 }
-
-export default Endpoints;
+ 
+export default Endpoints; 

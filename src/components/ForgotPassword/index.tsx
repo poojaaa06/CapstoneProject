@@ -3,9 +3,8 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
-import { Form, Input, Button, notification } from "antd";
+import { Form, Input, Button, notification, Card } from "antd";
 import { MailOutlined, UserOutlined } from "@ant-design/icons";
-import CustomCard from "src/asserts/UI_components/Card/card.styled";
 import { forgotPasswordSchema } from "src/validations/forgotPasswordSchema";
 import { forgotPasswordAPI } from "src/services/forgotPasswordAPI";
 import type { ForgotPasswordFormValues } from "src/types/auth.type";
@@ -30,7 +29,6 @@ const ForgotPassword: React.FC = () => {
         
         console.log("Forgot Password API response:", res);
         
-        // Check if the response indicates success (handle both formats)
         const isSuccess = res?.success === true || res?.data?.success === true;
         
         if (isSuccess) {
@@ -73,7 +71,7 @@ const ForgotPassword: React.FC = () => {
   return (
     <main className="forgot-password-page" aria-labelledby="fp-title">
       {contextHolder}
-      <CustomCard className="forgot-password-card">
+      <Card className="forgot-password-card">
         <h1 id="fp-title" className="forgot-password-title">
           Forgot password
         </h1>
@@ -116,7 +114,7 @@ const ForgotPassword: React.FC = () => {
             <Link to="/">← Back to login</Link>
           </div>
         </Form>
-      </CustomCard>
+      </Card>
     </main>
   );
 };

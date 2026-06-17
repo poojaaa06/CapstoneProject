@@ -1,4 +1,3 @@
-// src/types/dashboard.ts (create this new file)
 export type RequestStatus = 'Pending' | 'Approved' | 'Delivered' | 'Rejected';
 export type UrgencyLevel = 'Low' | 'Medium' | 'High';
 export type ActivityStatus = 'success' | 'pending' | 'failed';

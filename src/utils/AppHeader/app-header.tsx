@@ -45,9 +45,11 @@ const AppHeader = (props: any) => {
    const navigate = useNavigate();
 
   const logoutHandler = () => {
-    sessionStorage.removeItem("userDetails");
+    sessionStorage.clear();
+    //sessionStorage.removeItem("sessionId");
+    localStorage.clear();
     navigate("/", { replace: true });
-    }
+  };
 
   const ProfilePopoverContent = () => {
   

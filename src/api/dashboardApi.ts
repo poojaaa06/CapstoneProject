@@ -1,5 +1,4 @@
-// src/api/dashboardApi.ts
-import type { DashboardData } from '../types/dashboard'; // Changed from '../data/dashboard'
+import type { DashboardData } from '../types/dashboard'; 
 
 export interface DashboardResponse {
   success: boolean;
