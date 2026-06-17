@@ -38,14 +38,10 @@ const { Option } = Select;
 export const Profile: React.FC = () => {
   const { userDetails, setUserDetails } = useAppContext();
   const [isEditable, setIsEditable] = useState(false);
-  // null → no photo at all (blank avatar)
-  // "" → not yet loaded
-  // "data:..." → actual image
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [api, contextHolder] = notification.useNotification();
   const navigate = useNavigate();
   const { modal } = App.useApp();
-  // Seed profileImage once when userDetails first arrives
   useEffect(() => {
     if (!profileImage && userDetails) {
       setProfileImage(userDetails.user_image || null);
@@ -59,7 +55,6 @@ export const Profile: React.FC = () => {
       console.log('No valid file found');
       return;
     }
-    // Allowed image types
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
       notification.error({
@@ -68,8 +63,7 @@ export const Profile: React.FC = () => {
       });
       return;
     }
-    // Maximum size: 2 MB
-    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+    const maxSize = 2 * 1024 * 1024;
     if (file.size > maxSize) {
       notification.error({
         message: 'File Too Large',
@@ -122,7 +116,6 @@ export const Profile: React.FC = () => {
       },
     });
   };
-  // ── Form submit ─────────────────────────────────────────────────────────────
   const handleFormSubmit = async (
     values: any,
     {
@@ -135,14 +128,16 @@ export const Profile: React.FC = () => {
   ) => {
     console.log('FORM SUBMITTED', values);
     try {
-       const addressArray = values.user_address 
-      ? values.user_address.split('\n').filter((line: string) => line.trim() !== '')
-      : [];
-    
+      const addressArray = values.user_address
+        ? values.user_address
+            .split('\n')
+            .filter((line: string) => line.trim() !== '')
+        : [];
+
       const payload = {
         ...values,
         user_image: profileImage || '',
-         user_address: addressArray,
+        user_address: addressArray,
       };
       console.log('Payload:', payload);
       const response = await updateProfileAPI(payload);
@@ -178,7 +173,8 @@ export const Profile: React.FC = () => {
   const colLayout = isEditable
     ? { xs: 24, sm: 12, lg: 8 }
     : { xs: 24, sm: 12, lg: 6 };
-  // ── Render ───────────────────────────────────────────────────────────────────
+
+    
   return (
     <>
       {contextHolder}
@@ -202,9 +198,9 @@ export const Profile: React.FC = () => {
           user_city: userDetails?.user_city || '',
           user_state: userDetails?.user_state || '',
           user_country: userDetails?.user_country || '',
-          user_address: Array.isArray(userDetails?.user_address) 
-  ? userDetails.user_address.join('\n') 
-  : userDetails?.user_address || '',
+          user_address: Array.isArray(userDetails?.user_address)
+            ? userDetails.user_address.join('\n')
+            : userDetails?.user_address || '',
         }}
         validationSchema={profileValidationSchema}
         onSubmit={handleFormSubmit}
@@ -302,7 +298,7 @@ export const Profile: React.FC = () => {
                           });
                           return Upload.LIST_IGNORE;
                         }
-                        return false; // prevent auto upload
+                        return false;
                       }}
                       onChange={handleImageUpload}
                     >
@@ -394,7 +390,6 @@ export const Profile: React.FC = () => {
                     {userDetails?.user_first_name} {userDetails?.user_last_name}
                   </h2>
                   <p className="profile-email">{userDetails?.user_email}</p>
-                  {/* ── Bio Section ───────────────────────────────────── */}
                   <div className="profile-bio">
                     {isEditable ? (
                       <textarea
@@ -420,7 +415,6 @@ export const Profile: React.FC = () => {
                   {/* Personal Information */}
                   <Divider orientation="left">Personal Information</Divider>
                   <Row gutter={[16, 16]}>
-                    {/* User ID — always read-only */}
                     <Col {...colLayout}>
                       <AntForm.Item
                         label="User ID"
@@ -742,50 +736,55 @@ export const Profile: React.FC = () => {
                   <Divider orientation="left">Address Information</Divider>
                   <Row gutter={[16, 16]}>
                     {/* Address */}
-                   <Col span={24}>
-  <AntForm.Item
-    label="Address"
-    validateStatus={
-      touched.user_address
-        ? errors.user_address
-          ? 'error'
-          : 'success'
-        : ''
-    }
-    help={
-      touched.user_address
-        ? (errors.user_address as string)
-        : undefined
-    }
-    labelCol={{
-      className: isEditable ? '' : 'label-no-padding',
-    }}
-  >
-    {isEditable ? (
-      <textarea
-        className="ant-input address-textarea"
-        name="user_address"
-        rows={4}
-        value={values.user_address}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        placeholder="Enter your address"
-      />
-    ) : (
-      <div>
-        {Array.isArray(userDetails?.user_address) ? (
-          userDetails.user_address.map((line: string, index: number) => (
-            <Text key={index} style={{ display: 'block' }}>
-              {line}
-            </Text>
-          ))
-        ) : (
-          <Text>{userDetails?.user_address || '--'}</Text>
-        )}
-      </div>
-    )}
-  </AntForm.Item>
-</Col>
+                    <Col span={24}>
+                      <AntForm.Item
+                        label="Address"
+                        validateStatus={
+                          touched.user_address
+                            ? errors.user_address
+                              ? 'error'
+                              : 'success'
+                            : ''
+                        }
+                        help={
+                          touched.user_address
+                            ? (errors.user_address as string)
+                            : undefined
+                        }
+                        labelCol={{
+                          className: isEditable ? '' : 'label-no-padding',
+                        }}
+                      >
+                        {isEditable ? (
+                          <textarea
+                            className="ant-input address-textarea"
+                            name="user_address"
+                            rows={4}
+                            value={values.user_address}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            placeholder="Enter your address"
+                          />
+                        ) : (
+                          <div>
+                            {Array.isArray(userDetails?.user_address) ? (
+                              userDetails.user_address.map(
+                                (line: string, index: number) => (
+                                  <Text
+                                    key={index}
+                                    style={{ display: 'block' }}
+                                  >
+                                    {line}
+                                  </Text>
+                                ),
+                              )
+                            ) : (
+                              <Text>{userDetails?.user_address || '--'}</Text>
+                            )}
+                          </div>
+                        )}
+                      </AntForm.Item>
+                    </Col>
                     {/* Landmark */}
                     <Col {...colLayout}>
                       <AntForm.Item
