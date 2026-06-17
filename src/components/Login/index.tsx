@@ -1,16 +1,16 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useFormik } from "formik";
+import { Formik, Form } from "formik";
 //import CryptoJS from "crypto-js";
 import {
   App,
   Card,
-  Form,
+  Form as AntForm,
   Input,
   Checkbox,
   Button,
   Typography,
-  //notification,
+  //notification
 } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 
@@ -18,7 +18,11 @@ import { useAppContext } from "src/context/appContext";
 import { loginSchema } from "src/validations/loginSchema";
 import { loginAPI } from "src/services/loginApi";
 import { getSummaryAPI } from "src/services/summaryAPi";
-import { LoginFormValues, LoginApiResponse, UserSummary } from "src/types/auth.type";
+import {
+  LoginFormValues,
+  LoginApiResponse,
+  UserSummary,
+} from "src/types/auth.type";
 
 import "./login.css";
 
@@ -45,10 +49,7 @@ const LoginPage: React.FC = () => {
 
       console.log("Summary data received:", summaryData);
 
-      if (
-        summaryData &&
-        summaryData.user_unique_id === formik.values.user_unique_id
-      ) {
+      if (summaryData) {
         const sessionUserDetails: UserSummary = {
           user_unique_id: summaryData.user_unique_id,
           user_first_name: summaryData.user_first_name,
@@ -98,58 +99,6 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const formik = useFormik<LoginFormValues>({
-    initialValues,
-    validationSchema: loginSchema,
-
-    onSubmit: async (values) => {
-      if (!SECRET_KEY) {
-        notification.error({
-          message: "Configuration error. Contact support.",
-        });
-        return;
-      }
-
-      // const encryptedPassword = CryptoJS.AES.encrypt(
-      //   values.user_password,
-      //   SECRET_KEY,
-      // ).toString();
-
-      try {
-        const response = await loginAPI({
-          user_unique_id: values.user_unique_id,
-          user_password: values.user_password, //not encrypted for now
-        });
-
-        const data: LoginApiResponse | undefined = response?.data;
-
-        if (
-          response &&
-          [200, 201].includes(response.status) &&
-          data?.sessionId
-        ) {
-  notification.success({
-    message: "Login Successful",
-    description: "Welcome back!",
-    placement: "topRight",
-    duration: 2,
-    onClose: async () => {
-      await fetchSummary(data.sessionId);
-    },
-  });
-} else {
-          notification.error({
-            message: "Invalid credentials.",
-          });
-        }
-      } catch (error: any) {
-        notification.error({
-          message: error.message || "Something went wrong. Please try again.",
-        });
-      }
-    },
-  });
-
   return (
     <main className="lp-wrapper" aria-labelledby="lp-title">
       <Card className="lp-card" variant="outlined">
@@ -159,100 +108,167 @@ const LoginPage: React.FC = () => {
 
         <p className="lp-subtitle">Use your account credentials</p>
 
-        <Form
-          layout="vertical"
-          onFinish={() => formik.handleSubmit()}
-          noValidate
-        >
-          <Form.Item
-            label="Username"
-            htmlFor="user_unique_id"
-            validateStatus={
-              formik.touched.user_unique_id && formik.errors.user_unique_id
-                ? "error"
-                : ""
+        <Formik
+          initialValues={initialValues}
+          validationSchema={loginSchema}
+          onSubmit={async (values, { setSubmitting }) => {
+            if (!SECRET_KEY) {
+              notification.error({
+                message: "Configuration error. Contact support.",
+              });
+              return;
             }
-            help={formik.touched.user_unique_id && formik.errors.user_unique_id}
-          >
-            <Input
-              id="user_unique_id"
-              name="user_unique_id"
-              prefix={<UserOutlined aria-hidden />} 
-              autoComplete="username"
-              aria-label="Username"
-              aria-required="true"
-              value={formik.values.user_unique_id}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-            />
-          </Form.Item>
 
-          <Form.Item
-            label="Password"
-            htmlFor="user_password"
-            validateStatus={
-              formik.touched.user_password && formik.errors.user_password
-                ? "error"
-                : ""
-            }
-            help={formik.touched.user_password && formik.errors.user_password}
-          >
-            <Input.Password
-              id="user_password"
-              name="user_password"
-              prefix={<LockOutlined aria-hidden />}
-              autoComplete="current-password"
-              aria-label="Password"
-              aria-required="true"
-              value={formik.values.user_password}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-            />
-          </Form.Item>
+            // const encryptedPassword = CryptoJS.AES.encrypt(
+            //   values.user_password,
+            //   SECRET_KEY,
+            // ).toString();
 
-          <Form.Item>
-            <Checkbox
-              id="remember"
-              name="remember"
-              checked={formik.values.remember}
-              onChange={(e) =>
-                formik.setFieldValue("remember", e.target.checked)
+            try {
+              const response = await loginAPI({
+                user_unique_id: values.user_unique_id,
+                user_password: values.user_password,
+              });
+
+              const data: LoginApiResponse | undefined = response?.data;
+
+              if (
+                response &&
+                [200, 201].includes(response.status) &&
+                data?.sessionId
+              ) {
+                notification.success({
+                  message: "Login Successful",
+                  description: "Welcome back!",
+                  placement: "topRight",
+                  duration: 2,
+                  onClose: async () => {
+                    await fetchSummary(data.sessionId);
+                  },
+                });
+              } else {
+                notification.error({
+                  message: "Invalid credentials.",
+                });
               }
-            >
-              Remember me
-            </Checkbox>
-          </Form.Item>
+            } catch (error: any) {
+              notification.error({
+                message:
+                  error.message ||
+                  "Something went wrong. Please try again.",
+              });
+            } finally {
+              setSubmitting(false);
+            }
+          }}
+        >
+          {({
+            values,
+            errors,
+            touched,
+            handleChange,
+            handleBlur,
+            setFieldValue,
+            isSubmitting,
+          }) => (
+            <Form>
+              <AntForm.Item
+                label="Username"
+                validateStatus={
+                  touched.user_unique_id && errors.user_unique_id
+                    ? "error"
+                    : ""
+                }
+                help={
+                  touched.user_unique_id
+                    ? errors.user_unique_id
+                    : undefined
+                }
+              >
+                <Input
+                  id="user_unique_id"
+                  name="user_unique_id"
+                  prefix={<UserOutlined aria-hidden />}
+                  autoComplete="username"
+                  aria-label="Username"
+                  aria-required="true"
+                  value={values.user_unique_id}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                />
+              </AntForm.Item>
 
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="lp-submit"
-              loading={formik.isSubmitting}
-              aria-label="Sign in to your account"
-            >
-              Sign in
-            </Button>
-          </Form.Item>
+              <AntForm.Item
+                label="Password"
+                validateStatus={
+                  touched.user_password && errors.user_password
+                    ? "error"
+                    : ""
+                }
+                help={
+                  touched.user_password
+                    ? errors.user_password
+                    : undefined
+                }
+              >
+                <Input.Password
+                  id="user_password"
+                  name="user_password"
+                  prefix={<LockOutlined aria-hidden />}
+                  autoComplete="current-password"
+                  aria-label="Password"
+                  aria-required="true"
+                  value={values.user_password}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                />
+              </AntForm.Item>
 
-          <div className="lp-actions-row">
-            <Button
-              type="link"
-              className="lp-link-btn"
-              onClick={() => navigate("/forgot-password")}
-            >
-              Forgot password?
-            </Button>
+              <AntForm.Item>
+                <Checkbox
+                  id="remember"
+                  name="remember"
+                  checked={values.remember}
+                  onChange={(e) =>
+                    setFieldValue("remember", e.target.checked)
+                  }
+                >
+                  Remember me
+                </Checkbox>
+              </AntForm.Item>
 
-            <Button
-              type="link"
-              className="lp-link-btn"
-              onClick={() => navigate("/register")}
-            >
-              Register
-            </Button>
-          </div>
-        </Form>
+              <AntForm.Item>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  className="lp-submit"
+                  loading={isSubmitting}
+                  aria-label="Sign in to your account"
+                >
+                  Sign in
+                </Button>
+              </AntForm.Item>
+
+              <div className="lp-actions-row">
+                <Button
+                  type="link"
+                  className="lp-link-btn"
+                  onClick={() => navigate("/forgot-password")}
+                >
+                  Forgot password?
+                </Button>
+
+                <Button
+                  type="link"
+                  className="lp-link-btn"
+                  onClick={() => navigate("/register")}
+                >
+                  Register
+                </Button>
+              </div>
+            </Form>
+          )}
+        </Formik>
       </Card>
     </main>
   );
