@@ -924,19 +924,21 @@ const RegisterPage: React.FC = () => {
                         help={fieldHelp("user_address")}
                       >
                         <Input.TextArea
-                          id="user_address"
-                          name="user_address"
-                          rows={2}
-                          maxLength={255}
-                          showCount
-                          autoComplete="street-address"
-                          value={values.user_address && values.user_address.join(', ')}
-                          onChange={(e) => {
-                            const addressArray = e.target.value.split(',').map(s => s.trim());
-                            setFieldValue("user_address", addressArray);
-                          }}
-                          onBlur={handleBlur}
-                        />
+  id="user_address"
+  name="user_address"
+  rows={2}
+  maxLength={255}
+  showCount
+  autoComplete="street-address"
+  value={Array.isArray(values.user_address) ? values.user_address.join('\n') : ''}
+  onChange={(e) => {
+    // Split by newlines to preserve spaces
+    const addressArray = e.target.value.split('\n').filter(line => line.trim() !== '');
+    setFieldValue("user_address", addressArray);
+  }}
+  onBlur={handleBlur}
+  placeholder="Enter your address (one line per field)"
+/>
                       </Form.Item>
                     </Col>
 

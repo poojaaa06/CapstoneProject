@@ -135,9 +135,14 @@ export const Profile: React.FC = () => {
   ) => {
     console.log('FORM SUBMITTED', values);
     try {
+       const addressArray = values.user_address 
+      ? values.user_address.split('\n').filter((line: string) => line.trim() !== '')
+      : [];
+    
       const payload = {
         ...values,
         user_image: profileImage || '',
+         user_address: addressArray,
       };
       console.log('Payload:', payload);
       const response = await updateProfileAPI(payload);
@@ -197,7 +202,9 @@ export const Profile: React.FC = () => {
           user_city: userDetails?.user_city || '',
           user_state: userDetails?.user_state || '',
           user_country: userDetails?.user_country || '',
-          user_address: userDetails?.user_address || '',
+          user_address: Array.isArray(userDetails?.user_address) 
+  ? userDetails.user_address.join('\n') 
+  : userDetails?.user_address || '',
         }}
         validationSchema={profileValidationSchema}
         onSubmit={handleFormSubmit}
@@ -735,39 +742,50 @@ export const Profile: React.FC = () => {
                   <Divider orientation="left">Address Information</Divider>
                   <Row gutter={[16, 16]}>
                     {/* Address */}
-                    <Col span={24}>
-                      <AntForm.Item
-                        label="Address"
-                        validateStatus={
-                          touched.user_address
-                            ? errors.user_address
-                              ? 'error'
-                              : 'success'
-                            : ''
-                        }
-                        help={
-                          touched.user_address
-                            ? (errors.user_address as string)
-                            : undefined
-                        }
-                        labelCol={{
-                          className: isEditable ? '' : 'label-no-padding',
-                        }}
-                      >
-                        {isEditable ? (
-                          <textarea
-                            className="ant-input address-textarea"
-                            name="user_address"
-                            rows={4}
-                            value={values.user_address}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                          />
-                        ) : (
-                          <Text>{userDetails?.user_address || '--'}</Text>
-                        )}
-                      </AntForm.Item>
-                    </Col>
+                   <Col span={24}>
+  <AntForm.Item
+    label="Address"
+    validateStatus={
+      touched.user_address
+        ? errors.user_address
+          ? 'error'
+          : 'success'
+        : ''
+    }
+    help={
+      touched.user_address
+        ? (errors.user_address as string)
+        : undefined
+    }
+    labelCol={{
+      className: isEditable ? '' : 'label-no-padding',
+    }}
+  >
+    {isEditable ? (
+      <textarea
+        className="ant-input address-textarea"
+        name="user_address"
+        rows={4}
+        value={values.user_address}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        placeholder="Enter your address (one line per field)"
+      />
+    ) : (
+      <div>
+        {Array.isArray(userDetails?.user_address) ? (
+          userDetails.user_address.map((line: string, index: number) => (
+            <Text key={index} style={{ display: 'block' }}>
+              {line}
+            </Text>
+          ))
+        ) : (
+          <Text>{userDetails?.user_address || '--'}</Text>
+        )}
+      </div>
+    )}
+  </AntForm.Item>
+</Col>
                     {/* Landmark */}
                     <Col {...colLayout}>
                       <AntForm.Item
