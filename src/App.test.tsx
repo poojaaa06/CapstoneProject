@@ -5,6 +5,7 @@ import path from 'path';
 
 jest.mock('./components/Login/index', () => () => <div>Login Page</div>);
 jest.mock('./components/Register/index', () => () => <div>Register Page</div>);
+jest.mock('src/components/ForgotPassword', () => () => <div>Forgot Password Page</div>);
 jest.mock('./protected_routes/ProtectedRoutes', () => ({
   __esModule: true,
   default: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
